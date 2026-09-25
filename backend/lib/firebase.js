@@ -5,14 +5,19 @@ import { applicationDefault, cert, getApps, initializeApp } from 'firebase-admin
 // service-account key, given either as a file path in GOOGLE_APPLICATION_CREDENTIALS or as the
 // JSON itself in FIREBASE_SERVICE_ACCOUNT.
 export function hasServiceAccount() {
-  return Boolean(process.env.FIREBASE_SERVICE_ACCOUNT || process.env.GOOGLE_APPLICATION_CREDENTIALS);
+  return Boolean(
+    process.env.FIREBASE_SERVICE_ACCOUNT ||
+      process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+      process.env.K_SERVICE, // running on Google Cloud (Cloud Functions/Run): credentials are automatic
+  );
 }
 
 export function firebaseApp() {
   const [existing] = getApps();
   if (existing) return existing;
 
-  const projectId = process.env.FIREBASE_PROJECT_ID;
+  // On Cloud Functions the project ID is provided as GCLOUD_PROJECT (FIREBASE_* names are reserved there).
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT;
   if (!projectId) {
     throw new Error('FIREBASE_PROJECT_ID is not set. Add it to .env and restart the server.');
   }

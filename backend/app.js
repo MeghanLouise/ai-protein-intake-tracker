@@ -1,5 +1,4 @@
 import express from 'express';
-import path from 'node:path';
 import { estimateProtein } from './lib/ai.js';
 import { requireAuth } from './lib/auth.js';
 import { isValidInviteCode, requireInvite } from './lib/invites.js';
@@ -13,12 +12,11 @@ import {
   writeGoal,
 } from './lib/storage.js';
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+// The API. server.js runs it locally; index.js runs it as a Cloud Function behind Firebase Hosting.
+export const app = express();
 
 // Images arrive as base64 in JSON, so allow a generous body size.
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(import.meta.dirname, 'dist')));
 
 // Wrap async handlers so thrown errors reach the error middleware.
 const route = (fn) => (req, res, next) => fn(req, res).catch(next);
@@ -98,8 +96,4 @@ app.put('/api/goal', route(async (req, res) => {
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: err.message });
-});
-
-app.listen(PORT, () => {
-  console.log(`Protein tracker running at http://localhost:${PORT}`);
 });

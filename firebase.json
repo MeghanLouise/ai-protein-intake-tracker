@@ -1,0 +1,20 @@
+{
+  "hosting": {
+    "public": "dist",
+    "predeploy": ["npm run build"],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      { "source": "/api/**", "function": { "functionId": "api", "region": "us-central1" } }
+    ]
+  },
+  "functions": [
+    {
+      "source": "backend",
+      "codebase": "default",
+      "ignore": ["node_modules", ".git", "*.local", "firebase-debug.log"]
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}
