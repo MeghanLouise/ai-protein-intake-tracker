@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 // Images arrive as base64 in JSON, so allow a generous body size.
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(import.meta.dirname, 'public')));
+app.use(express.static(path.join(import.meta.dirname, 'dist')));
 
 // Wrap async handlers so thrown errors reach the error middleware.
 const route = (fn) => (req, res, next) => fn(req, res).catch(next);

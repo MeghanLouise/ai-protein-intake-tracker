@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
     "strict": true,
-    "rootDir": "client",
-    "outDir": "public",
+    "noEmit": true,
     "skipLibCheck": true,
-    "types": []
+    "isolatedModules": true,
+    "types": ["vite/client"]
   },
-  "include": ["client"]
+  "include": ["client/src", "vite.config.ts"]
 }

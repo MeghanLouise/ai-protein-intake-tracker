@@ -1,3 +1,5 @@
+/* Global styles. Each component uses plain class names (see components/) so it is easy to restyle. */
+
 :root {
   color-scheme: light dark;
   font-family: system-ui, sans-serif;
@@ -7,7 +9,7 @@ body {
   margin: 0;
 }
 
-main {
+.app {
   max-width: 32rem;
   margin: 0 auto;
   padding: 1rem;
@@ -17,6 +19,7 @@ section {
   margin-block: 1.5rem;
 }
 
+/* Progress */
 .totals {
   font-size: 2rem;
   font-weight: 600;
@@ -27,6 +30,7 @@ progress {
   height: 1.25rem;
 }
 
+/* Forms */
 form {
   display: flex;
   flex-direction: column;
@@ -54,10 +58,26 @@ button.link {
   align-self: flex-start;
 }
 
-#entries {
-  padding-left: 1.25rem;
+/* Entry log */
+.entry-log ul {
+  list-style: none;
+  padding: 0;
 }
 
-#status {
+.entry-log li {
+  display: flex;
+  gap: 0.75rem;
+  padding-block: 0.25rem;
+}
+
+.entry-log .description {
+  flex: 1;
+}
+
+.status {
   min-height: 1.25rem;
+}
+
+.error {
+  color: crimson;
 }

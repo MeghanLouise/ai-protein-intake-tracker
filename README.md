@@ -10,18 +10,21 @@ cp .env.example .env   # then add your Gemini API key
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:5173 (Vite, with hot reload). It forwards `/api` calls to the Express server on port 3000, which `npm run dev` starts for you.
 
-`npm run dev` recompiles the frontend and restarts the server on changes. `npm start` compiles once, then starts the server. `npm run build` only compiles.
+For a production-style run, `npm start` builds the client into `dist/` and serves everything from http://localhost:3000. `npm run typecheck` checks the TypeScript without building.
 
 ## Layout
 
-- `server.js` – Express server and JSON API
-- `lib/ai.js` – protein estimation (stub, Gemini integration is next)
+- `server.js` – Express server and JSON API (also serves `dist/`)
+- `lib/ai.js` – protein estimation with Gemini
 - `lib/storage.js` – CSV entries (`data/entries.csv`) and goal (`data/goal.json`)
-- `client/app.ts` – frontend logic in TypeScript, compiled by `tsc` to `public/app.js` (generated, edit `client/app.ts` instead)
-- `public/` – static frontend (`index.html`, `style.css`, compiled `app.js`)
-- `scripts/dev.mjs` – runs `tsc --watch` and the server together for `npm run dev`
+- `client/` – React + TypeScript frontend (Vite)
+  - `src/App.tsx` – loads today's data and lays out the page
+  - `src/components/` – `ProgressSummary`, `AddMealForm` (`EstimateForm` -> `ConfirmForm`), `EntryList`
+  - `src/api.ts`, `src/types.ts` – API calls and shared types
+  - `src/index.css` – styles (plain class names, one per component section)
+- `scripts/dev.mjs` – runs Vite and the server together for `npm run dev`
 
 ## API
 

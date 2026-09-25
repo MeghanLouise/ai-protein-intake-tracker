@@ -5,9 +5,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "start": "tsc && node --env-file-if-exists=.env server.js",
-    "dev": "node scripts/dev.mjs"
+    "dev": "node scripts/dev.mjs",
+    "build": "vite build",
+    "start": "vite build && node --env-file-if-exists=.env server.js",
+    "typecheck": "tsc"
   },
   "engines": {
     "node": ">=20.6"

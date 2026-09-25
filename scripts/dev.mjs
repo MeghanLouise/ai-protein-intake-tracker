@@ -1,8 +1,8 @@
-// Runs the TypeScript compiler and the server in watch mode together, and stops both on Ctrl+C.
+// Runs the Vite dev server and the API server in watch mode together, and stops both on Ctrl+C.
 import { spawn } from 'node:child_process';
 
 const commands = [
-  ['npx', ['tsc', '--watch', '--preserveWatchOutput']],
+  ['npx', ['vite']],
   ['node', ['--watch', '--env-file-if-exists=.env', 'server.js']],
 ];
 
