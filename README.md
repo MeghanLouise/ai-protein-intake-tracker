@@ -26,16 +26,27 @@ The sign-up form asks for a code, and anyone who signs in without having redeeme
 
 The `VITE_FIREBASE_*` values are public identifiers, not secrets. The service-account key is the only Firebase secret.
 
-## Deploy (Render, free tier)
+## Deploy (Firebase Hosting + Cloud Functions)
 
-The repo includes a `render.yaml` blueprint: one web service that builds the client and serves it together with the API.
+Hosting serves the built site (`dist/`) and forwards `/api/**` to a Cloud Function (`backend/index.js`) that runs the Express API. Firestore rules (`firestore.rules`) block all direct browser access. Cloud Functions needs the **Blaze (pay-as-you-go)** plan; the function is capped at 3 instances and this app's usage sits inside the free allowances, but set a budget alert in Google Cloud to be safe.
 
-1. Push the repo to GitHub.
-2. In [Render](https://render.com): **New > Blueprint**, pick the repo, and fill in the prompted environment values (the same ones as your local `.env`: `GEMINI_API_KEY`, `INVITE_CODES`, `FIREBASE_PROJECT_ID` and the four `VITE_FIREBASE_*`).
-3. In the service's **Environment > Secret Files**, add a file named `service-account.json` and paste in the contents of your service-account key. Render mounts it at `/etc/secrets/service-account.json`, where `render.yaml` already points.
-4. When it's live, add the `*.onrender.com` address to Firebase **Authentication > Settings > Authorized domains**, or sign-in won't work there.
+One-time setup:
 
-The free tier sleeps after about 15 minutes of inactivity, so the first visit after a quiet spell takes a while to load. Data lives in Firestore, so nothing is lost when it sleeps or redeploys.
+1. Upgrade the project to **Blaze** in the Firebase console (Usage and billing).
+2. Store the two server secrets (each command reads the value from your local `.env`):
+
+```bash
+grep '^GEMINI_API_KEY=' .env | cut -d= -f2- | firebase functions:secrets:set GEMINI_API_KEY --data-file -
+grep '^INVITE_CODES=' .env | cut -d= -f2- | firebase functions:secrets:set INVITE_CODES --data-file -
+```
+
+Then, every time you want to publish:
+
+```bash
+npm run deploy
+```
+
+This builds the client and deploys Hosting, the function and the Firestore rules. The site is at `https://<project-id>.web.app` (that domain is already authorized for sign-in). No service-account key is needed in production: the function uses Google's built-in credentials. Update `INVITE_CODES` later with the same `secrets:set` command, then deploy again.
 
 ## Run
 
@@ -50,12 +61,14 @@ For a production-style run, `npm start` builds the client into `dist/` and serve
 
 ## Layout
 
-- `server.js` – Express server and JSON API (also serves `dist/`)
-- `lib/ai.js` – protein estimation with Gemini
-- `lib/auth.js` – verifies Firebase ID tokens (`requireAuth` middleware)
-- `lib/invites.js` – invite-code check and `requireInvite` middleware
-- `lib/firebase.js` – shared Firebase Admin setup
-- `lib/storage.js` – per-user entries, goal and invite status in Firestore
+- `server.js` – local server: the API plus the built client from `dist/`
+- `backend/app.js` – the Express API (shared by `server.js` and the Cloud Function)
+- `backend/index.js` – Cloud Function entry point; `firebase.json` routes `/api/**` to it
+- `backend/lib/ai.js` – protein estimation with Gemini
+- `backend/lib/auth.js` – verifies Firebase ID tokens (`requireAuth` middleware)
+- `backend/lib/invites.js` – invite-code check and `requireInvite` middleware
+- `backend/lib/firebase.js` – shared Firebase Admin setup
+- `backend/lib/storage.js` – per-user entries, goal and invite status in Firestore
 - `client/` – React + TypeScript frontend (Vite)
   - `src/App.tsx` – loads today's data and lays out the page
   - `src/components/` – `ProgressSummary`, `AddMealForm` (`EstimateForm` -> `ConfirmForm`), `EntryList`
