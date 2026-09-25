@@ -17,6 +17,14 @@ async function request<T>(url: string, method = 'GET', body?: unknown): Promise<
   return data as T;
 }
 
+export const checkInvite = (code: string) =>
+  request<{ ok: true }>('/api/invite/check', 'POST', { code });
+
+export const getMe = () => request<{ activated: boolean }>('/api/me');
+
+export const redeemInvite = (code: string) =>
+  request<{ activated: true }>('/api/invite/redeem', 'POST', { code });
+
 export const getToday = () => request<TodayResponse>('/api/today');
 
 export const estimateProtein = (text: string, image?: ImagePayload) =>

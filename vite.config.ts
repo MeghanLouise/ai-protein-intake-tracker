@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 // In dev, Vite runs on :5173 and forwards /api calls to the Express server on :3000.
 export default defineConfig({
   root: 'client',
+  envDir: '..', // read VITE_* settings from the project-root .env
   plugins: [react()],
   build: { outDir: '../dist', emptyOutDir: true },
   server: { proxy: { '/api': 'http://localhost:3000' } },

@@ -327,6 +327,89 @@ button.link:hover:not(:disabled) {
   border-radius: var(--radius-sm);
 }
 
+/* Sign-in */
+.account {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  color: var(--taupe);
+}
+
+.account .link {
+  display: inline;
+  font-size: inherit;
+}
+
+.sign-in {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 24rem;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.sign-in h2 {
+  margin: 0;
+  text-align: center;
+}
+
+.sign-in .link {
+  align-self: center;
+}
+
+button.google {
+  color: var(--espresso);
+  background: var(--white);
+  border: 1px solid var(--sand);
+}
+
+button.google:hover:not(:disabled) {
+  background: var(--cream);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--taupe);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--linen);
+}
+
+.setup {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--mocha-dark);
+}
+
+code {
+  padding: 0.1rem 0.35rem;
+  font-size: 0.9em;
+  background: var(--cream);
+  border-radius: 0.4rem;
+}
+
+input[type='email'],
+input[type='password'] {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--espresso);
+  background: var(--cream);
+  border: 1px solid var(--sand);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
 /* Entry log */
 .entry-log ul {
   list-style: none;
