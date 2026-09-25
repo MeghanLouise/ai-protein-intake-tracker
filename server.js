@@ -49,10 +49,15 @@ app.post('/api/invite/redeem', route(async (req, res) => {
 // Everything below also needs an activated (invited) user.
 app.use('/api', requireInvite);
 
+// The browser sends its own local date/time (the server may be in another timezone, e.g. UTC).
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE = /^\d{2}:\d{2}$/;
+const pick = (value, re, fallback) => (typeof value === 'string' && re.test(value) ? value : fallback);
+
 // Today's entries, running total, and goal.
 app.get('/api/today', route(async (req, res) => {
-  const date = todayString();
-  const entries = (await readEntries(req.uid)).filter((e) => e.date === date);
+  const date = pick(req.query.date, DATE_RE, todayString());
+  const entries = await readEntries(req.uid, date);
   const total = entries.reduce((sum, e) => sum + e.protein_g, 0);
   res.json({ date, total, goal: await readGoal(req.uid), entries });
 }));
@@ -65,12 +70,21 @@ app.post('/api/estimate', route(async (req, res) => {
 
 // Save a (possibly user-edited) entry.
 app.post('/api/entries', route(async (req, res) => {
-  const { description, protein_g } = req.body;
+  const { description, protein_g, date, time } = req.body;
   const grams = Number(protein_g);
-  if (!description || !Number.isFinite(grams) || grams < 0) {
-    return res.status(400).json({ error: 'description and a non-negative protein_g are required' });
+  if (typeof description !== 'string' || !description.trim() || description.length > 200) {
+    return res.status(400).json({ error: 'description is required (200 characters max)' });
   }
-  res.status(201).json(await addEntry(req.uid, { description, protein_g: grams }));
+  if (!Number.isFinite(grams) || grams < 0 || grams > 1000) {
+    return res.status(400).json({ error: 'protein_g must be a number between 0 and 1000' });
+  }
+  const entry = {
+    description: description.trim(),
+    protein_g: grams,
+    date: pick(date, DATE_RE, todayString()),
+    time: pick(time, TIME_RE, new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })),
+  };
+  res.status(201).json(await addEntry(req.uid, entry));
 }));
 
 app.put('/api/goal', route(async (req, res) => {

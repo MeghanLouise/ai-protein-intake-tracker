@@ -25,13 +25,17 @@ export const getMe = () => request<{ activated: boolean }>('/api/me');
 export const redeemInvite = (code: string) =>
   request<{ activated: true }>('/api/invite/redeem', 'POST', { code });
 
-export const getToday = () => request<TodayResponse>('/api/today');
+// The server may be in another timezone, so send our local date and time.
+const localDate = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+const localTime = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+export const getToday = () => request<TodayResponse>(`/api/today?date=${localDate()}`);
 
 export const estimateProtein = (text: string, image?: ImagePayload) =>
   request<Estimate>('/api/estimate', 'POST', { text, image });
 
 export const saveEntry = (description: string, protein_g: number) =>
-  request<Entry>('/api/entries', 'POST', { description, protein_g });
+  request<Entry>('/api/entries', 'POST', { description, protein_g, date: localDate(), time: localTime() });
 
 export const saveGoal = (goal: number) => request<{ goal: number }>('/api/goal', 'PUT', { goal });
 
