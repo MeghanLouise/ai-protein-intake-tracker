@@ -3,9 +3,16 @@
 import { getAuth } from 'firebase-admin/auth';
 import { firebaseApp } from './firebase.js';
 
-// Express middleware: requires "Authorization: Bearer <ID token>" and sets req.uid.
+// The browser sends the ID token in "X-Firebase-Auth". It can't use "Authorization" in production:
+// Google's Cloud Functions front door tries to verify any Bearer token there as a Google-issued
+// token and rejects Firebase ones before this code runs. "Authorization: Bearer" still works as a
+// fallback (handy for curl and local testing).
+const tokenFrom = (req) =>
+  req.headers['x-firebase-auth'] || req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];
+
+// Express middleware: requires a Firebase ID token and sets req.uid.
 export async function requireAuth(req, res, next) {
-  const token = req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];
+  const token = tokenFrom(req);
   if (!token) return res.status(401).json({ error: 'Please sign in.' });
 
   let firebaseAuth;

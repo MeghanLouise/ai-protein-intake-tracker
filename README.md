@@ -79,7 +79,7 @@ For a production-style run, `npm start` builds the client into `dist/` and serve
 
 ## API
 
-All `/api` routes require `Authorization: Bearer <Firebase ID token>`.
+All `/api` routes require the user's Firebase ID token in an `X-Firebase-Auth` header (`Authorization: Bearer` also works locally; on Cloud Functions Google rejects Firebase tokens sent that way).
 
 - `POST /api/invite/check` – `{ code }` (no sign-in needed) used by the sign-up form
 - `GET /api/me`, `POST /api/invite/redeem` – signed-in only; activation status and redeeming a code

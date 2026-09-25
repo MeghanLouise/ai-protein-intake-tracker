@@ -8,7 +8,7 @@ async function request<T>(url: string, method = 'GET', body?: unknown): Promise<
     method,
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(token && { 'X-Firebase-Auth': token }), // not Authorization: see backend/lib/auth.js
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
