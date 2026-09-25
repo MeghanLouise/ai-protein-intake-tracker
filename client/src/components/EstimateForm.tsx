@@ -19,21 +19,17 @@ export default function EstimateForm({ busy, onSubmit, onInvalid }: Props) {
   return (
     <form className="estimate-form" onSubmit={submit}>
       <textarea
-        rows={2}
+        rows={3}
         placeholder="e.g. two eggs and a chicken breast"
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      <label className="file">
-        Or upload a photo
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0])}
-        />
+      <label className="file-pick">
+        <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0])} />
+        <span className="file-pick-label">{file ? file.name : 'Add a photo'}</span>
       </label>
       <button type="submit" disabled={busy}>
-        Estimate protein
+        {busy ? 'Estimating…' : 'Estimate protein'}
       </button>
     </form>
   );

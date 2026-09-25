@@ -43,7 +43,7 @@ export default function AddMealForm({ onSaved }: Props) {
   };
 
   return (
-    <section className="add-meal">
+    <section className="card add-meal">
       <h2>What did you eat?</h2>
       {estimate ? (
         <ConfirmForm

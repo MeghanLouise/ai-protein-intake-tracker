@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { estimateProtein } from './lib/ai.js';
+import { requireAuth } from './lib/auth.js';
 import { addEntry, readEntries, readGoal, todayString, writeGoal } from './lib/storage.js';
 
 const app = express();
@@ -10,15 +11,18 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(import.meta.dirname, 'dist')));
 
+// Every API route needs a signed-in Firebase user; the verified uid is on req.uid.
+app.use('/api', requireAuth);
+
 // Wrap async handlers so thrown errors reach the error middleware.
 const route = (fn) => (req, res, next) => fn(req, res).catch(next);
 
 // Today's entries, running total, and goal.
 app.get('/api/today', route(async (req, res) => {
   const date = todayString();
-  const entries = (await readEntries()).filter((e) => e.date === date);
+  const entries = (await readEntries(req.uid)).filter((e) => e.date === date);
   const total = entries.reduce((sum, e) => sum + e.protein_g, 0);
-  res.json({ date, total, goal: await readGoal(), entries });
+  res.json({ date, total, goal: await readGoal(req.uid), entries });
 }));
 
 // Ask the AI for an estimate. Does not save anything.
@@ -34,7 +38,7 @@ app.post('/api/entries', route(async (req, res) => {
   if (!description || !Number.isFinite(grams) || grams < 0) {
     return res.status(400).json({ error: 'description and a non-negative protein_g are required' });
   }
-  res.status(201).json(await addEntry({ description, protein_g: grams }));
+  res.status(201).json(await addEntry(req.uid, { description, protein_g: grams }));
 }));
 
 app.put('/api/goal', route(async (req, res) => {
@@ -42,7 +46,7 @@ app.put('/api/goal', route(async (req, res) => {
   if (!Number.isFinite(goal) || goal <= 0) {
     return res.status(400).json({ error: 'goal must be a positive number' });
   }
-  res.json({ goal: await writeGoal(goal) });
+  res.json({ goal: await writeGoal(req.uid, goal) });
 }));
 
 app.use((err, req, res, next) => {

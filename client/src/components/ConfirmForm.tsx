@@ -21,12 +21,15 @@ export default function ConfirmForm({ estimate, busy, onSave, onCancel }: Props)
   return (
     <form className="confirm-form" onSubmit={submit}>
       <p className="breakdown">{estimate.breakdown}</p>
-      <input
-        type="text"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        required
-      />
+      <label>
+        Meal
+        <input
+          type="text"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+        />
+      </label>
       <label>
         Protein (g)
         <input
@@ -38,12 +41,14 @@ export default function ConfirmForm({ estimate, busy, onSave, onCancel }: Props)
           required
         />
       </label>
-      <button type="submit" disabled={busy}>
-        Save
-      </button>
-      <button type="button" className="link" onClick={onCancel}>
-        Cancel
-      </button>
+      <div className="row">
+        <button type="submit" disabled={busy}>
+          Save
+        </button>
+        <button type="button" className="link" onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
     </form>
   );
 }

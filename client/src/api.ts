@@ -1,9 +1,15 @@
+import { auth } from './firebase';
 import type { Entry, Estimate, ImagePayload, TodayResponse } from './types';
 
 async function request<T>(url: string, method = 'GET', body?: unknown): Promise<T> {
+  // Firebase caches the token and refreshes it automatically when it's about to expire.
+  const token = await auth?.currentUser?.getIdToken();
   const res = await fetch(url, {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = await res.json();

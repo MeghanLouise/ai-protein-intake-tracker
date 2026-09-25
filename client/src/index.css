@@ -1,83 +1,372 @@
-/* Global styles. Each component uses plain class names (see components/) so it is easy to restyle. */
+/* Global styles. Components use plain class names (see components/), so each piece is easy to restyle. */
 
 :root {
-  color-scheme: light dark;
-  font-family: system-ui, sans-serif;
+  color-scheme: light;
+
+  /* Palette: soft greys and black */
+  --cream: #f2f1ef;
+  --linen: #e5e3e0;
+  --sand: #d3d0cc;
+  --white: #fdfdfc;
+  --mocha: #6a6764;
+  --mocha-dark: #2b2a29;
+  --espresso: #161616;
+  --taupe: #8b8884;
+  --error: #a4483a;
+
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+
+  --radius: 1.5rem;
+  --radius-sm: 0.9rem;
+  --shadow: 0 1px 2px rgba(20, 20, 20, 0.05), 0 12px 32px -12px rgba(20, 20, 20, 0.16);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  color: var(--espresso);
+  background:
+    radial-gradient(60rem 30rem at 50% -10rem, #f9f8f7 0%, transparent 70%),
+    var(--cream);
+  -webkit-font-smoothing: antialiased;
 }
 
 .app {
-  max-width: 32rem;
+  max-width: 30rem;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 3rem 1.25rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-section {
-  margin-block: 1.5rem;
+/* Cards stack on phones; on wider screens the tracker sits beside today's log. */
+.layout,
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 44rem) {
+  .app {
+    max-width: 62rem;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+  }
+
+  .column:last-child {
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+/* Header */
+.masthead {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 2.75rem;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--mocha);
+}
+
+.date {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+h2 {
+  margin: 0 0 1rem;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 1.6rem;
+}
+
+/* Cards */
+.card {
+  background: var(--white);
+  border: 1px solid var(--linen);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--taupe);
 }
 
 /* Progress */
 .totals {
-  font-size: 2rem;
-  font-weight: 600;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0.25rem 0 1rem;
 }
 
-progress {
-  width: 100%;
-  height: 1.25rem;
+.total {
+  font-family: var(--font-serif);
+  font-size: 4.5rem;
+  line-height: 1;
+}
+
+.goal-of {
+  color: var(--taupe);
+  font-size: 1rem;
+}
+
+.bar {
+  height: 0.7rem;
+  background: var(--linen);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a8a5a1, var(--espresso));
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.remaining {
+  margin: 0.75rem 0 1rem;
+  font-size: 0.95rem;
+  color: var(--mocha-dark);
 }
 
 /* Forms */
 form {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.9rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--taupe);
 }
 
 textarea,
 input[type='text'],
 input[type='number'] {
+  width: 100%;
   font: inherit;
-  padding: 0.5rem;
+  font-size: 1rem;
+  color: var(--espresso);
+  background: var(--cream);
+  border: 1px solid var(--sand);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  resize: vertical;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 
+textarea::placeholder {
+  color: #b0aca8;
+}
+
+textarea:focus,
+input:focus {
+  outline: none;
+  background: var(--white);
+  border-color: var(--mocha);
+  box-shadow: 0 0 0 4px rgba(22, 22, 22, 0.1);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Buttons */
 button {
   font: inherit;
-  padding: 0.5rem 1rem;
+  font-weight: 500;
   cursor: pointer;
+  color: var(--white);
+  background: var(--espresso);
+  border: none;
+  border-radius: 999px;
+  padding: 0.85rem 1.5rem;
+  transition: background 0.15s, transform 0.1s, opacity 0.15s;
+}
+
+button:hover:not(:disabled) {
+  background: var(--mocha-dark);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+button:focus-visible,
+.file-pick:focus-within {
+  outline: 2px solid var(--mocha);
+  outline-offset: 3px;
 }
 
 button.link {
   background: none;
-  border: none;
-  padding: 0;
-  text-decoration: underline;
+  color: var(--mocha);
+  padding: 0.25rem 0;
+  border-radius: 0;
   align-self: flex-start;
+  text-decoration: underline;
+  text-decoration-color: var(--sand);
+  text-underline-offset: 0.3em;
+  font-size: 0.9rem;
+}
+
+button.link:hover:not(:disabled) {
+  background: none;
+  color: var(--mocha-dark);
+  text-decoration-color: currentColor;
+}
+
+/* Photo picker: the real <input> is hidden, the label acts as the button */
+.file-pick {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  font-size: 0.95rem;
+  color: var(--mocha-dark);
+  background: transparent;
+  border: 1.5px dashed var(--sand);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.file-pick:hover {
+  border-color: var(--mocha);
+  background: var(--cream);
+}
+
+.file-pick input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.file-pick-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breakdown {
+  margin: 0;
+  padding: 1rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--mocha-dark);
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+}
+
+.status {
+  margin: 0.9rem 0 0;
+  font-size: 0.85rem;
+  color: var(--taupe);
+}
+
+.status:empty {
+  display: none;
+}
+
+.error {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  color: var(--error);
+  background: #f8ebe7;
+  border-radius: var(--radius-sm);
 }
 
 /* Entry log */
 .entry-log ul {
   list-style: none;
+  margin: 0;
   padding: 0;
 }
 
 .entry-log li {
-  display: flex;
+  display: grid;
+  grid-template-columns: 3.25rem 1fr auto;
+  align-items: baseline;
   gap: 0.75rem;
-  padding-block: 0.25rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--linen);
 }
 
-.entry-log .description {
-  flex: 1;
+.entry-log li:first-child {
+  border-top: none;
+  padding-top: 0;
 }
 
-.status {
-  min-height: 1.25rem;
+.time {
+  font-size: 0.8rem;
+  color: var(--taupe);
+  font-variant-numeric: tabular-nums;
 }
 
-.error {
-  color: crimson;
+.grams {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  color: var(--mocha-dark);
+}
+
+.empty {
+  margin: 0;
+  color: var(--taupe);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
 }

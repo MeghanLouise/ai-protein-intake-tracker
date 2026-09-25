@@ -2,10 +2,10 @@ import type { Entry } from '../types';
 
 export default function EntryList({ entries }: { entries: Entry[] }) {
   return (
-    <section className="entry-log">
-      <h2>Today</h2>
+    <section className="card entry-log">
+      <h2>Today's log</h2>
       {entries.length === 0 ? (
-        <p className="empty">Nothing logged yet.</p>
+        <p className="empty">Nothing logged yet. Start with breakfast.</p>
       ) : (
         <ul>
           {entries.map((e, i) => (
