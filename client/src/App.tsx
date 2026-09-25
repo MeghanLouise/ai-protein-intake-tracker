@@ -1,6 +1,6 @@
 import { signOut } from 'firebase/auth';
 import { useEffect, useState } from 'react';
-import { getMe } from './api';
+import { errorMessage, getMe } from './api';
 import { auth, firebaseConfigured } from './firebase';
 import InviteGate from './components/InviteGate';
 import SignIn from './components/SignIn';
@@ -12,14 +12,16 @@ export default function App() {
   // null = still checking. Once true it stays true for this sign-in.
   const [activated, setActivated] = useState<boolean | null>(null);
   const [finishingSignUp, setFinishingSignUp] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   const uid = user?.uid;
   useEffect(() => {
     setActivated(null);
+    setLoadError('');
     if (!uid) return;
     getMe()
       .then((me) => setActivated((prev) => prev || me.activated))
-      .catch(() => setActivated((prev) => prev ?? false));
+      .catch((err) => setLoadError(errorMessage(err)));
   }, [uid]);
 
   let content;
@@ -38,6 +40,16 @@ export default function App() {
   } else if (!user) {
     content = (
       <SignIn onSignUpProgress={setFinishingSignUp} onActivated={() => setActivated(true)} />
+    );
+  } else if (loadError && activated !== true) {
+    content = (
+      <section className="card sign-in">
+        <h2>Something went wrong</h2>
+        <p className="error" role="alert">{loadError}</p>
+        <button type="button" className="link" onClick={() => auth && signOut(auth)}>
+          Sign out
+        </button>
+      </section>
     );
   } else if (activated === null || finishingSignUp) {
     content = null;
