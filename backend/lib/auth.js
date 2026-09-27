@@ -3,10 +3,10 @@
 import { getAuth } from 'firebase-admin/auth';
 import { firebaseApp } from './firebase.js';
 
-// The browser sends the ID token in "X-Firebase-Auth". It can't use "Authorization" in production:
-// Google's Cloud Functions front door tries to verify any Bearer token there as a Google-issued
-// token and rejects Firebase ones before this code runs. "Authorization: Bearer" still works as a
-// fallback (handy for curl and local testing).
+// The browser sends the ID token in "X-Firebase-Auth" rather than "Authorization". Right after
+// the first production deploy, Google's Cloud Functions front door rejected Firebase tokens sent
+// as "Authorization: Bearer" before this code ran, so a custom header is the safe choice.
+// "Authorization: Bearer" is still accepted as a fallback (handy for curl and local testing).
 const tokenFrom = (req) =>
   req.headers['x-firebase-auth'] || req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];
 
