@@ -1,7 +1,5 @@
-import { signOut } from 'firebase/auth';
 import { useState } from 'react';
 import { errorMessage, redeemInvite } from '../api';
-import { auth } from '../firebase';
 
 // Shown to signed-in users who haven't redeemed an invite code yet (e.g. new Google sign-ins).
 export default function InviteGate({ onActivated }: { onActivated: () => void }) {
@@ -43,9 +41,7 @@ export default function InviteGate({ onActivated }: { onActivated: () => void })
         </button>
       </form>
       {error && <p className="error" role="alert">{error}</p>}
-      <button type="button" className="link" onClick={() => auth && signOut(auth)}>
-        Sign out
-      </button>
+      <p className="setup">You can sign out from the menu (&#8942;) at the top of the page.</p>
     </section>
   );
 }

@@ -1,8 +1,8 @@
-import { signOut } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { errorMessage, getMe } from './api';
-import { auth, firebaseConfigured } from './firebase';
+import { firebaseConfigured } from './firebase';
 import InviteGate from './components/InviteGate';
+import MenuBar from './components/MenuBar';
 import SignIn from './components/SignIn';
 import Tracker from './components/Tracker';
 import { useAuth } from './useAuth';
@@ -46,9 +46,6 @@ export default function App() {
       <section className="card sign-in">
         <h2>Something went wrong</h2>
         <p className="error" role="alert">{loadError}</p>
-        <button type="button" className="link" onClick={() => auth && signOut(auth)}>
-          Sign out
-        </button>
       </section>
     );
   } else if (activated === null || finishingSignUp) {
@@ -61,23 +58,17 @@ export default function App() {
   }
 
   return (
-    <main className="app">
-      <header className="masthead">
-        <h1>Protein <em>Tracker</em></h1>
-        <p className="date">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </p>
-        {user && activated && (
-          <p className="account">
-            {user.email ?? user.displayName}
-            {' · '}
-            <button type="button" className="link" onClick={() => auth && signOut(auth)}>
-              Sign out
-            </button>
+    <>
+      {firebaseConfigured && <MenuBar user={user} />}
+      <main className="app">
+        <header className="masthead">
+          <h1>Protein <em>Tracker</em></h1>
+          <p className="date">
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
-        )}
-      </header>
-      {content}
-    </main>
+        </header>
+        {content}
+      </main>
+    </>
   );
 }
