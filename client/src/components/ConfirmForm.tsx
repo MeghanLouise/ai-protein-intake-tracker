@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Estimate } from '../types';
+import Spinner from './Spinner';
 
 interface Props {
   estimate: Estimate;
@@ -43,6 +44,7 @@ export default function ConfirmForm({ estimate, busy, onSave, onCancel }: Props)
       </label>
       <div className="row">
         <button type="submit" disabled={busy}>
+          {busy && <Spinner />}
           Save
         </button>
         <button type="button" className="link" onClick={onCancel}>

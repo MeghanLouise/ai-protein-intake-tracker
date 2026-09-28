@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { errorMessage, getDay, todayDate } from '../api';
 import type { TodayResponse } from '../types';
 import EntryList from './EntryList';
+import MonthCalendar from './MonthCalendar';
+import Spinner from './Spinner';
 
 // A date picker plus that day's totals and log. Reuses the same /api/today endpoint as the
 // tracker, which accepts any date, not only today.
@@ -33,21 +35,15 @@ export default function CalendarView() {
       <div className="column">
         <section className="card">
           <p className="eyebrow">Calendar view</p>
-          <label>
-            Date
-            <input
-              type="date"
-              value={date}
-              max={todayDate()}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </label>
-          {day && (
+          <MonthCalendar value={date} max={todayDate()} onChange={setDate} />
+          {day ? (
             <div className="totals calendar-totals">
               <span className="total">{Math.round(day.total)}</span>
               <span className="goal-of">of {day.goal} g</span>
             </div>
-          )}
+          ) : !error ? (
+            <Spinner label={`Loading ${heading}…`} />
+          ) : null}
         </section>
       </div>
       <div className="column">

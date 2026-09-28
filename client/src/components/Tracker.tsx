@@ -4,6 +4,7 @@ import type { TodayResponse } from '../types';
 import AddMealForm from './AddMealForm';
 import EntryList from './EntryList';
 import ProgressSummary from './ProgressSummary';
+import Spinner from './Spinner';
 
 // The signed-in view: today's progress, the add-meal form and the log.
 export default function Tracker() {
@@ -35,7 +36,7 @@ export default function Tracker() {
   return (
     <>
       {error && <p className="error" role="alert">{error}</p>}
-      {today && (
+      {today ? (
         <div className="layout">
           <div className="column">
             <ProgressSummary total={today.total} goal={today.goal} onGoalChange={changeGoal} />
@@ -45,7 +46,9 @@ export default function Tracker() {
             <EntryList entries={today.entries} />
           </div>
         </div>
-      )}
+      ) : !error ? (
+        <Spinner label="Loading today's log…" />
+      ) : null}
     </>
   );
 }

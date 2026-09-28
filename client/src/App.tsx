@@ -5,6 +5,7 @@ import CalendarView from './components/CalendarView';
 import InviteGate from './components/InviteGate';
 import MenuBar from './components/MenuBar';
 import SignIn from './components/SignIn';
+import Spinner from './components/Spinner';
 import Tracker from './components/Tracker';
 import { useAuth } from './useAuth';
 import { usePath } from './usePath';
@@ -39,7 +40,7 @@ export default function App() {
       </section>
     );
   } else if (loading) {
-    content = null;
+    content = <div className="page-loading"><Spinner label="Loading…" /></div>;
   } else if (!user) {
     content = (
       <SignIn onSignUpProgress={setFinishingSignUp} onActivated={() => setActivated(true)} />
@@ -52,7 +53,11 @@ export default function App() {
       </section>
     );
   } else if (activated === null || finishingSignUp) {
-    content = null;
+    content = (
+      <div className="page-loading">
+        <Spinner label={finishingSignUp ? 'Creating your account…' : 'Loading…'} />
+      </div>
+    );
   } else if (activated) {
     // key resets all state if a different person signs in
     content = path === '/calendar' ? <CalendarView key={user.uid} /> : <Tracker key={user.uid} />;

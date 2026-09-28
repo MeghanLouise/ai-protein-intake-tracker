@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Spinner from './Spinner';
 
 interface Props {
   busy: boolean;
@@ -29,6 +30,7 @@ export default function EstimateForm({ busy, onSubmit, onInvalid }: Props) {
         <span className="file-pick-label">{file ? file.name : 'Add a photo'}</span>
       </label>
       <button type="submit" disabled={busy}>
+        {busy && <Spinner />}
         {busy ? 'Estimating…' : 'Estimate protein'}
       </button>
     </form>
