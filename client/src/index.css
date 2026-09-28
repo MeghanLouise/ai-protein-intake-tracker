@@ -480,6 +480,11 @@ code {
   border-radius: 0.4rem;
 }
 
+.calendar-totals {
+  margin-top: 1rem;
+}
+
+input[type='date'],
 input[type='email'],
 input[type='password'] {
   width: 100%;

@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { errorMessage, getMe } from './api';
 import { firebaseConfigured } from './firebase';
+import CalendarView from './components/CalendarView';
 import InviteGate from './components/InviteGate';
 import MenuBar from './components/MenuBar';
 import SignIn from './components/SignIn';
 import Tracker from './components/Tracker';
 import { useAuth } from './useAuth';
+import { usePath } from './usePath';
 
 export default function App() {
   const { user, loading } = useAuth();
+  const [path, navigate] = usePath();
   // null = still checking. Once true it stays true for this sign-in.
   const [activated, setActivated] = useState<boolean | null>(null);
   const [finishingSignUp, setFinishingSignUp] = useState(false);
@@ -52,14 +55,20 @@ export default function App() {
     content = null;
   } else if (activated) {
     // key resets all state if a different person signs in
-    content = <Tracker key={user.uid} />;
+    content = path === '/calendar' ? <CalendarView key={user.uid} /> : <Tracker key={user.uid} />;
   } else {
     content = <InviteGate onActivated={() => setActivated(true)} />;
   }
 
   return (
     <>
-      {firebaseConfigured && <MenuBar user={user} />}
+      {firebaseConfigured && (
+        <MenuBar
+          user={user}
+          currentPath={activated ? path : undefined}
+          onNavigate={navigate}
+        />
+      )}
       <main className="app">
         <header className="masthead">
           <h1>Protein <em>Tracker</em></h1>

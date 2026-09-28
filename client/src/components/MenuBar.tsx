@@ -3,8 +3,15 @@ import type { User } from 'firebase/auth';
 import { useEffect, useRef, useState } from 'react';
 import { auth } from '../firebase';
 
-// A slim top bar with the brand and a "More options" overflow menu (account + sign out).
-export default function MenuBar({ user }: { user: User | null }) {
+interface Props {
+  user: User | null;
+  // Only set once the tracker is showing, so the nav item doesn't appear during sign-in/invite screens.
+  currentPath?: string;
+  onNavigate?: (path: string) => void;
+}
+
+// A slim top bar with the brand and a "More options" overflow menu (nav + account + sign out).
+export default function MenuBar({ user, currentPath, onNavigate }: Props) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -44,6 +51,18 @@ export default function MenuBar({ user }: { user: User | null }) {
           </button>
           {open && (
             <div className="menu-dropdown" role="menu">
+              {currentPath && onNavigate && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setOpen(false);
+                    onNavigate(currentPath === '/calendar' ? '/' : '/calendar');
+                  }}
+                >
+                  {currentPath === '/calendar' ? 'Back to today' : 'Calendar view'}
+                </button>
+              )}
               {user ? (
                 <>
                   <p className="menu-account">{user.email ?? user.displayName}</p>

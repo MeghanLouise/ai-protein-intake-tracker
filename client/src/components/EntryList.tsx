@@ -1,9 +1,14 @@
 import type { Entry } from '../types';
 
-export default function EntryList({ entries }: { entries: Entry[] }) {
+interface Props {
+  entries: Entry[];
+  title?: string;
+}
+
+export default function EntryList({ entries, title = "Today's log" }: Props) {
   return (
     <section className="card entry-log">
-      <h2>Today's log</h2>
+      <h2>{title}</h2>
       {entries.length === 0 ? (
         <p className="empty">Nothing logged yet. Start with breakfast.</p>
       ) : (

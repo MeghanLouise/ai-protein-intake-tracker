@@ -28,8 +28,12 @@ export const redeemInvite = (code: string) =>
 // The server may be in another timezone, so send our local date and time.
 const localDate = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
 const localTime = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+export const todayDate = localDate;
 
 export const getToday = () => request<TodayResponse>(`/api/today?date=${localDate()}`);
+
+// Same endpoint, for the calendar view: any past date.
+export const getDay = (date: string) => request<TodayResponse>(`/api/today?date=${date}`);
 
 export const estimateProtein = (text: string, image?: ImagePayload) =>
   request<Estimate>('/api/estimate', 'POST', { text, image });
