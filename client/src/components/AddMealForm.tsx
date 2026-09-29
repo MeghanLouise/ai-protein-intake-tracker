@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { errorMessage, estimateProtein, readImage, saveEntry } from '../api';
+import { errorMessage, estimateNutrition, readImage, saveEntry } from '../api';
 import type { Estimate } from '../types';
 import ConfirmForm from './ConfirmForm';
 import EstimateForm from './EstimateForm';
@@ -19,7 +19,7 @@ export default function AddMealForm({ onSaved }: Props) {
     setStatus('Estimating…');
     try {
       const image = file ? await readImage(file) : undefined;
-      setEstimate(await estimateProtein(text, image));
+      setEstimate(await estimateNutrition(text, image));
       setStatus('');
     } catch (err) {
       setStatus(errorMessage(err));
@@ -28,10 +28,10 @@ export default function AddMealForm({ onSaved }: Props) {
     }
   };
 
-  const save = async (description: string, grams: number) => {
+  const save = async (description: string, grams: number, calories: number, fiber: number) => {
     setBusy(true);
     try {
-      await saveEntry(description, grams);
+      await saveEntry(description, grams, calories, fiber);
       setEstimate(null);
       setStatus('');
       onSaved();

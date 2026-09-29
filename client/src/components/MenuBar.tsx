@@ -2,10 +2,11 @@ import { signOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { useEffect, useRef, useState } from 'react';
 import { auth } from '../firebase';
+import { menuLabel, PAGES } from '../pages';
 
 interface Props {
   user: User | null;
-  // Only set once the tracker is showing, so the nav item doesn't appear during sign-in/invite screens.
+  // Only set once the tracker is showing, so nav items don't appear during sign-in/invite screens.
   currentPath?: string;
   onNavigate?: (path: string) => void;
 }
@@ -36,7 +37,7 @@ export default function MenuBar({ user, currentPath, onNavigate }: Props) {
     <nav className="menu-bar">
       <div className="menu-bar-inner">
         <span className="brand">
-          Protein <em>Tracker</em>
+          Wellness <em>Tracker</em>
         </span>
         <div className="menu" ref={menuRef}>
           <button
@@ -51,18 +52,21 @@ export default function MenuBar({ user, currentPath, onNavigate }: Props) {
           </button>
           {open && (
             <div className="menu-dropdown" role="menu">
-              {currentPath && onNavigate && (
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setOpen(false);
-                    onNavigate(currentPath === '/calendar' ? '/' : '/calendar');
-                  }}
-                >
-                  {currentPath === '/calendar' ? 'Back to today' : 'Calendar view'}
-                </button>
-              )}
+              {currentPath &&
+                onNavigate &&
+                PAGES.filter((page) => page.path !== currentPath).map((page) => (
+                  <button
+                    key={page.path}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setOpen(false);
+                      onNavigate(page.path);
+                    }}
+                  >
+                    {menuLabel(page)}
+                  </button>
+                ))}
               {user ? (
                 <>
                   <p className="menu-account">{user.email ?? user.displayName}</p>

@@ -1,12 +1,26 @@
 import { useState } from 'react';
+import type { Preferences } from '../usePreferences';
+import DisplayToggles from './DisplayToggles';
 
 interface Props {
   total: number;
   goal: number;
+  calories: number;
+  fiber: number;
+  prefs: Preferences;
+  onToggle: (key: keyof Preferences) => void;
   onGoalChange: (goal: number) => void;
 }
 
-export default function ProgressSummary({ total, goal, onGoalChange }: Props) {
+export default function ProgressSummary({
+  total,
+  goal,
+  calories,
+  fiber,
+  prefs,
+  onToggle,
+  onGoalChange,
+}: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(goal));
 
@@ -41,6 +55,13 @@ export default function ProgressSummary({ total, goal, onGoalChange }: Props) {
         <div className="bar-fill" style={{ width: `${percent}%` }} />
       </div>
       <p className="remaining">{remaining > 0 ? `${remaining} g to go` : 'Goal reached'}</p>
+      {(prefs.showCalories || prefs.showFiber) && (
+        <p className="extra-stats">
+          {prefs.showCalories && <span>{Math.round(calories)} cal</span>}
+          {prefs.showFiber && <span>{Math.round(fiber)} g fiber</span>}
+        </p>
+      )}
+      <DisplayToggles prefs={prefs} onToggle={onToggle} />
       {editing ? (
         <form className="goal-form" onSubmit={submit}>
           <label>

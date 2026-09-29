@@ -1,6 +1,6 @@
-# AI Protein Intake Tracker
+# Wellness Tracker
 
-A small web app for tracking daily protein. Describe a meal or upload a photo, an AI estimates the grams, and entries are stored per user in Firestore.
+A small web app for tracking daily protein (plus calories and fiber), workouts and supplements. Describe a meal or upload a photo, an AI estimates the nutrition, and entries are stored per user in Firestore.
 
 ## Set up sign-in (Firebase)
 
@@ -64,14 +64,25 @@ For a production-style run, `npm start` builds the client into `dist/` and serve
 - `server.js` – local server: the API plus the built client from `dist/`
 - `backend/app.js` – the Express API (shared by `server.js` and the Cloud Function)
 - `backend/index.js` – Cloud Function entry point; `firebase.json` routes `/api/**` to it
-- `backend/lib/ai.js` – protein estimation with Gemini
+- `backend/lib/ai.js` – nutrition estimation (protein, calories, fiber) with Gemini
 - `backend/lib/auth.js` – verifies Firebase ID tokens (`requireAuth` middleware)
 - `backend/lib/invites.js` – invite-code check and `requireInvite` middleware
 - `backend/lib/firebase.js` – shared Firebase Admin setup
-- `backend/lib/storage.js` – per-user entries, goal and invite status in Firestore
+- `backend/lib/storage.js` – per-user entries, workouts, supplements, goal and invite status in Firestore
+- `backend/lib/workouts.js` – the fixed workout catalog (day type -> exercise list) and validation
 - `client/` – React + TypeScript frontend (Vite)
-  - `src/App.tsx` – loads today's data and lays out the page
-  - `src/components/` – `ProgressSummary`, `AddMealForm` (`EstimateForm` -> `ConfirmForm`), `EntryList`
+  - `src/App.tsx` – routes between pages and lays out the shared header
+  - `src/usePath.ts` – tiny client-side router (History API, no library)
+  - `src/components/MenuBar.tsx` – top bar; its "More options" menu links to every page
+  - `src/components/Tracker.tsx` – the protein page: `ProgressSummary`, `AddMealForm`
+    (`EstimateForm` -> `ConfirmForm`), `EntryList`
+  - `src/components/CalendarView.tsx` – pick a past date (`MonthCalendar`) and see that day's log
+  - `src/components/WorkoutTracker.tsx` – pick a day type/exercise (`AddSetForm`), see today's sets
+    (`WorkoutEntryList`); `src/workouts.ts` holds the exercise catalog shared with the server
+  - `src/components/SupplementsPage.tsx` – a personal supplement list and today's checklist
+    (`SupplementChecklist`, `AddSupplementForm`)
+  - `src/usePreferences.ts`, `components/DisplayToggles.tsx` – which nutrients to show
+    (calories/fiber), saved to `localStorage` per device
   - `src/firebase.ts`, `src/useAuth.ts`, `components/SignIn.tsx` – Firebase sign-in
   - `src/api.ts`, `src/types.ts` – API calls (sent with the user's token) and shared types
   - `src/index.css` – styles (plain class names, one per component section)
@@ -84,7 +95,10 @@ All `/api` routes require the user's Firebase ID token in an `X-Firebase-Auth` h
 - `POST /api/invite/check` – `{ code }` (no sign-in needed) used by the sign-up form
 - `GET /api/me`, `POST /api/invite/redeem` – signed-in only; activation status and redeeming a code
 - The routes below also require an activated account
-- `GET /api/today` – today's entries, total, and goal
-- `POST /api/estimate` – `{ text?, image?: { mimeType, data } }` returns an estimate (does not save)
-- `POST /api/entries` – `{ description, protein_g }` saves an entry
+- `GET /api/today` – today's entries, totals (protein, calories, fiber), and goal
+- `POST /api/estimate` – `{ text?, image?: { mimeType, data } }` returns a protein/calorie/fiber estimate (does not save)
+- `POST /api/entries` – `{ description, protein_g, calories, fiber_g }` saves an entry
 - `PUT /api/goal` – `{ goal }`
+- `GET /api/workouts`, `POST /api/workouts` – today's (or any date's) logged sets; `{ category, exercise, weight, reps }` to log one
+- `GET /api/supplements`, `POST /api/supplements`, `POST /api/supplements/remove` – the user's supplement list
+- `GET /api/supplement-checks`, `PUT /api/supplement-checks` – which supplements were checked off on a day; `{ name, taken }` to toggle one

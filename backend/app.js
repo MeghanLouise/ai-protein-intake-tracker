@@ -1,16 +1,26 @@
 import express from 'express';
-import { estimateProtein } from './lib/ai.js';
+import { estimateNutrition } from './lib/ai.js';
 import { requireAuth } from './lib/auth.js';
 import { isValidInviteCode, requireInvite } from './lib/invites.js';
 import {
   addEntry,
+  addSupplement,
+  addWorkout,
   isActivated,
   markActivated,
   readEntries,
+  readExerciseCatalog,
   readGoal,
+  readSupplementChecks,
+  readSupplements,
+  readWorkouts,
+  removeSupplement,
+  setSupplementCheck,
   todayString,
+  writeExerciseCatalog,
   writeGoal,
 } from './lib/storage.js';
+import { EXERCISES, isValidExercise, sanitizeCatalog } from './lib/workouts.js';
 
 // The API. server.js runs it locally; index.js runs it as a Cloud Function behind Firebase Hosting.
 export const app = express();
@@ -52,37 +62,133 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
 const pick = (value, re, fallback) => (typeof value === 'string' && re.test(value) ? value : fallback);
 
-// Today's entries, running total, and goal.
+// Today's entries, running totals, and goal.
 app.get('/api/today', route(async (req, res) => {
   const date = pick(req.query.date, DATE_RE, todayString());
   const entries = await readEntries(req.uid, date);
   const total = entries.reduce((sum, e) => sum + e.protein_g, 0);
-  res.json({ date, total, goal: await readGoal(req.uid), entries });
+  const totalCalories = entries.reduce((sum, e) => sum + (e.calories || 0), 0);
+  const totalFiber = entries.reduce((sum, e) => sum + (e.fiber_g || 0), 0);
+  res.json({
+    date,
+    total,
+    totalCalories,
+    totalFiber,
+    goal: await readGoal(req.uid),
+    entries,
+  });
 }));
 
 // Ask the AI for an estimate. Does not save anything.
 app.post('/api/estimate', route(async (req, res) => {
   const { text, image } = req.body;
-  res.json(await estimateProtein({ text, image }));
+  res.json(await estimateNutrition({ text, image }));
 }));
 
 // Save a (possibly user-edited) entry.
 app.post('/api/entries', route(async (req, res) => {
-  const { description, protein_g, date, time } = req.body;
+  const { description, protein_g, calories, fiber_g, date, time } = req.body;
   const grams = Number(protein_g);
+  const cal = Number(calories) || 0;
+  const fiber = Number(fiber_g) || 0;
   if (typeof description !== 'string' || !description.trim() || description.length > 200) {
     return res.status(400).json({ error: 'description is required (200 characters max)' });
   }
   if (!Number.isFinite(grams) || grams < 0 || grams > 1000) {
     return res.status(400).json({ error: 'protein_g must be a number between 0 and 1000' });
   }
+  if (cal < 0 || cal > 10000) {
+    return res.status(400).json({ error: 'calories must be a number between 0 and 10000' });
+  }
+  if (fiber < 0 || fiber > 300) {
+    return res.status(400).json({ error: 'fiber_g must be a number between 0 and 300' });
+  }
   const entry = {
     description: description.trim(),
     protein_g: grams,
+    calories: cal,
+    fiber_g: fiber,
     date: pick(date, DATE_RE, todayString()),
     time: pick(time, TIME_RE, new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })),
   };
   res.status(201).json(await addEntry(req.uid, entry));
+}));
+
+// Today's (or any date's) logged workout sets.
+app.get('/api/workouts', route(async (req, res) => {
+  const date = pick(req.query.date, DATE_RE, todayString());
+  res.json({ date, workouts: await readWorkouts(req.uid, date) });
+}));
+
+// Save a workout set: a chosen exercise (from the fixed catalog) with weight and reps.
+app.post('/api/workouts', route(async (req, res) => {
+  const { category, exercise, weight, reps, date, time } = req.body;
+  if (!isValidExercise(category, exercise)) {
+    return res.status(400).json({ error: 'Unrecognized category or exercise.' });
+  }
+  const w = Number(weight);
+  const r = Number(reps);
+  if (!Number.isFinite(w) || w < 0 || w > 2000) {
+    return res.status(400).json({ error: 'weight must be a number between 0 and 2000' });
+  }
+  if (!Number.isInteger(r) || r < 0 || r > 200) {
+    return res.status(400).json({ error: 'reps must be a whole number between 0 and 200' });
+  }
+  const set = {
+    category,
+    exercise,
+    weight: w,
+    reps: r,
+    date: pick(date, DATE_RE, todayString()),
+    time: pick(time, TIME_RE, new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })),
+  };
+  res.status(201).json(await addWorkout(req.uid, set));
+}));
+
+// The exercises available for each day type: the user's picks, or the defaults if unset.
+app.get('/api/exercise-catalog', route(async (req, res) => {
+  const custom = await readExerciseCatalog(req.uid);
+  res.json({ catalog: custom ?? EXERCISES, options: EXERCISES });
+}));
+
+// Save which exercises (from the fixed master list) belong to each day type.
+app.put('/api/exercise-catalog', route(async (req, res) => {
+  const catalog = sanitizeCatalog(req.body?.catalog);
+  res.json({ catalog: await writeExerciseCatalog(req.uid, catalog) });
+}));
+
+// The user's supplement catalog (their personal to-take list, not a per-day log).
+app.get('/api/supplements', route(async (req, res) => {
+  res.json({ supplements: await readSupplements(req.uid) });
+}));
+
+app.post('/api/supplements', route(async (req, res) => {
+  const name = String(req.body?.name ?? '').trim();
+  if (!name || name.length > 60) {
+    return res.status(400).json({ error: 'name is required (60 characters max)' });
+  }
+  res.status(201).json({ supplements: await addSupplement(req.uid, name) });
+}));
+
+// A POST (not DELETE) so the name travels safely in the body, not a URL path.
+app.post('/api/supplements/remove', route(async (req, res) => {
+  const name = String(req.body?.name ?? '');
+  res.json({ supplements: await removeSupplement(req.uid, name) });
+}));
+
+// Which of today's (or any date's) supplements have been checked off.
+app.get('/api/supplement-checks', route(async (req, res) => {
+  const date = pick(req.query.date, DATE_RE, todayString());
+  res.json({ date, taken: await readSupplementChecks(req.uid, date) });
+}));
+
+// Check or uncheck one supplement for a day.
+app.put('/api/supplement-checks', route(async (req, res) => {
+  const name = String(req.body?.name ?? '');
+  if (!name) return res.status(400).json({ error: 'name is required' });
+  const date = pick(req.body?.date, DATE_RE, todayString());
+  await setSupplementCheck(req.uid, date, name, Boolean(req.body?.taken));
+  res.json({ ok: true });
 }));
 
 app.put('/api/goal', route(async (req, res) => {

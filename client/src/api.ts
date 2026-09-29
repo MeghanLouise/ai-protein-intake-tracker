@@ -1,5 +1,14 @@
 import { auth } from './firebase';
-import type { Entry, Estimate, ImagePayload, TodayResponse } from './types';
+import type {
+  Entry,
+  Estimate,
+  ImagePayload,
+  SupplementChecksResponse,
+  SupplementsResponse,
+  TodayResponse,
+  WorkoutSet,
+  WorkoutsResponse,
+} from './types';
 
 async function request<T>(url: string, method = 'GET', body?: unknown): Promise<T> {
   // Firebase caches the token and refreshes it automatically when it's about to expire.
@@ -35,13 +44,46 @@ export const getToday = () => request<TodayResponse>(`/api/today?date=${localDat
 // Same endpoint, for the calendar view: any past date.
 export const getDay = (date: string) => request<TodayResponse>(`/api/today?date=${date}`);
 
-export const estimateProtein = (text: string, image?: ImagePayload) =>
+export const estimateNutrition = (text: string, image?: ImagePayload) =>
   request<Estimate>('/api/estimate', 'POST', { text, image });
 
-export const saveEntry = (description: string, protein_g: number) =>
-  request<Entry>('/api/entries', 'POST', { description, protein_g, date: localDate(), time: localTime() });
+export const saveEntry = (description: string, protein_g: number, calories: number, fiber_g: number) =>
+  request<Entry>('/api/entries', 'POST', {
+    description,
+    protein_g,
+    calories,
+    fiber_g,
+    date: localDate(),
+    time: localTime(),
+  });
 
 export const saveGoal = (goal: number) => request<{ goal: number }>('/api/goal', 'PUT', { goal });
+
+export const getWorkouts = (date: string) => request<WorkoutsResponse>(`/api/workouts?date=${date}`);
+
+export const saveWorkout = (category: string, exercise: string, weight: number, reps: number) =>
+  request<WorkoutSet>('/api/workouts', 'POST', {
+    category,
+    exercise,
+    weight,
+    reps,
+    date: localDate(),
+    time: localTime(),
+  });
+
+export const getSupplements = () => request<SupplementsResponse>('/api/supplements');
+
+export const addSupplement = (name: string) =>
+  request<SupplementsResponse>('/api/supplements', 'POST', { name });
+
+export const removeSupplement = (name: string) =>
+  request<SupplementsResponse>('/api/supplements/remove', 'POST', { name });
+
+export const getSupplementChecks = (date: string) =>
+  request<SupplementChecksResponse>(`/api/supplement-checks?date=${date}`);
+
+export const setSupplementCheck = (name: string, taken: boolean) =>
+  request<{ ok: true }>('/api/supplement-checks', 'PUT', { name, taken, date: localDate() });
 
 // Read a File as { mimeType, data } with base64 data (no data: prefix).
 export function readImage(file: File): Promise<ImagePayload> {

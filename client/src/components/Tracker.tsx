@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { errorMessage, getToday, saveGoal } from '../api';
 import type { TodayResponse } from '../types';
+import { usePreferences } from '../usePreferences';
 import AddMealForm from './AddMealForm';
 import EntryList from './EntryList';
 import ProgressSummary from './ProgressSummary';
@@ -10,6 +11,7 @@ import Spinner from './Spinner';
 export default function Tracker() {
   const [today, setToday] = useState<TodayResponse | null>(null);
   const [error, setError] = useState('');
+  const { prefs, toggle } = usePreferences();
 
   const refresh = useCallback(async () => {
     try {
@@ -39,11 +41,23 @@ export default function Tracker() {
       {today ? (
         <div className="layout">
           <div className="column">
-            <ProgressSummary total={today.total} goal={today.goal} onGoalChange={changeGoal} />
+            <ProgressSummary
+              total={today.total}
+              goal={today.goal}
+              calories={today.totalCalories}
+              fiber={today.totalFiber}
+              prefs={prefs}
+              onToggle={toggle}
+              onGoalChange={changeGoal}
+            />
             <AddMealForm onSaved={refresh} />
           </div>
           <div className="column">
-            <EntryList entries={today.entries} />
+            <EntryList
+              entries={today.entries}
+              showCalories={prefs.showCalories}
+              showFiber={prefs.showFiber}
+            />
           </div>
         </div>
       ) : !error ? (

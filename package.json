@@ -1,7 +1,7 @@
 {
   "name": "ai-protein-intake-tracker",
   "version": "0.1.0",
-  "description": "Track daily protein intake, with AI estimating grams from text or photos.",
+  "description": "Wellness Tracker: track daily protein, calories, fiber, workouts and supplements, with AI estimating nutrition from text or photos.",
   "private": true,
   "type": "module",
   "scripts": {

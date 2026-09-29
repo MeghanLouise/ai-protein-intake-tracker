@@ -3,9 +3,11 @@ import type { Entry } from '../types';
 interface Props {
   entries: Entry[];
   title?: string;
+  showCalories?: boolean;
+  showFiber?: boolean;
 }
 
-export default function EntryList({ entries, title = "Today's log" }: Props) {
+export default function EntryList({ entries, title = "Today's log", showCalories, showFiber }: Props) {
   return (
     <section className="card entry-log">
       <h2>{title}</h2>
@@ -17,7 +19,11 @@ export default function EntryList({ entries, title = "Today's log" }: Props) {
             <li key={`${e.time}-${i}`}>
               <span className="time">{e.time}</span>
               <span className="description">{e.description}</span>
-              <span className="grams">{e.protein_g} g</span>
+              <span className="stats">
+                <span className="figure">{e.protein_g} g</span>
+                {showCalories && <span className="stat-chip">{Math.round(e.calories)} cal</span>}
+                {showFiber && <span className="stat-chip">{Math.round(e.fiber_g)} g fiber</span>}
+              </span>
             </li>
           ))}
         </ul>

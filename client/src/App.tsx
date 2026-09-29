@@ -6,7 +6,10 @@ import InviteGate from './components/InviteGate';
 import MenuBar from './components/MenuBar';
 import SignIn from './components/SignIn';
 import Spinner from './components/Spinner';
+import SupplementsPage from './components/SupplementsPage';
 import Tracker from './components/Tracker';
+import WorkoutTracker from './components/WorkoutTracker';
+import { pageInfo } from './pages';
 import { useAuth } from './useAuth';
 import { usePath } from './usePath';
 
@@ -60,13 +63,29 @@ export default function App() {
     );
   } else if (activated) {
     // key resets all state if a different person signs in
-    content = path === '/calendar' ? <CalendarView key={user.uid} /> : <Tracker key={user.uid} />;
+    content =
+      path === '/calendar' ? (
+        <CalendarView key={user.uid} />
+      ) : path === '/workout' ? (
+        <WorkoutTracker key={user.uid} />
+      ) : path === '/supplements' ? (
+        <SupplementsPage key={user.uid} />
+      ) : (
+        <Tracker key={user.uid} />
+      );
   } else {
     content = <InviteGate onActivated={() => setActivated(true)} />;
   }
 
+  // Drives the per-page accent colors in index.css (a subtle way to tell pages apart).
+  const pageKey =
+    path === '/calendar' ? 'calendar' : path === '/workout' ? 'workout' : path === '/supplements' ? 'supplements' : 'today';
+
+  // The big heading matches whatever this page is called in the menu (see pages.ts).
+  const current = pageInfo(path);
+
   return (
-    <>
+    <div data-page={pageKey}>
       {firebaseConfigured && (
         <MenuBar
           user={user}
@@ -76,13 +95,16 @@ export default function App() {
       )}
       <main className="app">
         <header className="masthead">
-          <h1>Protein <em>Tracker</em></h1>
+          <h1>
+            {current.title && `${current.title} `}
+            <em>{current.accent}</em>
+          </h1>
           <p className="date">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </header>
         {content}
       </main>
-    </>
+    </div>
   );
 }

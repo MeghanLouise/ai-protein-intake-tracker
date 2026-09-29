@@ -1,4 +1,4 @@
-// AI protein estimation via the Gemini API (free tier).
+// AI nutrition estimation via the Gemini API (free tier).
 
 // Tried in order. Free-tier models are sometimes overloaded (503) or rate limited (429),
 // so we fall back to the next one. Set GEMINI_MODEL in .env to pin a single model.
@@ -11,21 +11,25 @@ const endpoint = (model) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const PROMPT = `You are a nutrition assistant. Estimate the total grams of protein in the meal described by the text and/or photo below.
+const PROMPT = `You are a nutrition assistant. Estimate the protein, calories and fiber in the meal described by the text and/or photo below.
 - Make reasonable assumptions about portion size when it isn't stated, and say what you assumed.
 - "description" is a short name for the meal (under 60 characters).
-- "breakdown" is one or two sentences listing each item with its estimated protein.
-- "protein_g" is the total for the whole meal, as a number rounded to the nearest gram.
-- If the input doesn't contain food, return protein_g 0 and explain in "breakdown".`;
+- "breakdown" is one or two sentences listing each item with its estimated protein, calories and fiber.
+- "protein_g" is the total protein for the whole meal, in grams, rounded to the nearest gram.
+- "calories" is the total calories for the whole meal, rounded to the nearest 10.
+- "fiber_g" is the total dietary fiber for the whole meal, in grams, rounded to the nearest gram.
+- If the input doesn't contain food, return all three numbers as 0 and explain in "breakdown".`;
 
 const RESPONSE_SCHEMA = {
   type: 'OBJECT',
   properties: {
     protein_g: { type: 'NUMBER' },
+    calories: { type: 'NUMBER' },
+    fiber_g: { type: 'NUMBER' },
     description: { type: 'STRING' },
     breakdown: { type: 'STRING' },
   },
-  required: ['protein_g', 'description', 'breakdown'],
+  required: ['protein_g', 'calories', 'fiber_g', 'description', 'breakdown'],
 };
 
 // POST to Gemini, falling back across models and retrying when they are busy.
@@ -51,11 +55,13 @@ async function generate(payload) {
   throw new Error(`Gemini request failed: ${lastError}`);
 }
 
+const nonNegative = (n) => Math.max(0, Number(n) || 0);
+
 /**
  * @param {{ text?: string, image?: { mimeType: string, data: string } }} input
- * @returns {Promise<{ protein_g: number, description: string, breakdown: string }>}
+ * @returns {Promise<{ protein_g: number, calories: number, fiber_g: number, description: string, breakdown: string }>}
  */
-export async function estimateProtein({ text, image }) {
+export async function estimateNutrition({ text, image }) {
   if (!text && !image) {
     throw new Error('Provide a text description or an image.');
   }
@@ -83,7 +89,9 @@ export async function estimateProtein({ text, image }) {
 
   const result = JSON.parse(raw);
   return {
-    protein_g: Math.max(0, Math.round(Number(result.protein_g) || 0)),
+    protein_g: Math.round(nonNegative(result.protein_g)),
+    calories: Math.round(nonNegative(result.calories)),
+    fiber_g: Math.round(nonNegative(result.fiber_g)),
     description: String(result.description),
     breakdown: String(result.breakdown),
   };

@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, signInWithCustomToken } from 'firebase/auth';
 
 // These values are public identifiers (not secrets). They come from .env as VITE_FIREBASE_*.
 const config = {
@@ -13,3 +13,9 @@ export const firebaseConfigured = Boolean(config.apiKey && config.authDomain && 
 
 // null until the Firebase settings are added to .env, so the app can show a setup message.
 export const auth = firebaseConfigured ? getAuth(initializeApp(config)) : null;
+
+// TEMP (dev-only, remove before committing): lets an automated test drive real sign-in.
+if (import.meta.env.DEV && auth) {
+  (window as unknown as { __testSignIn?: unknown }).__testSignIn = (token: string) =>
+    signInWithCustomToken(auth, token);
+}
