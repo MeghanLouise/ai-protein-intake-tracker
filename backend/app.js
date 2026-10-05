@@ -20,7 +20,7 @@ import {
   writeExerciseCatalog,
   writeGoal,
 } from './lib/storage.js';
-import { EXERCISES, isValidExercise, sanitizeCatalog } from './lib/workouts.js';
+import { EXERCISES, sanitizeCatalog } from './lib/workouts.js';
 
 // The API. server.js runs it locally; index.js runs it as a Cloud Function behind Firebase Hosting.
 export const app = express();
@@ -120,10 +120,13 @@ app.get('/api/workouts', route(async (req, res) => {
   res.json({ date, workouts: await readWorkouts(req.uid, date) });
 }));
 
-// Save a workout set: a chosen exercise (from the fixed catalog) with weight and reps.
+// Save a workout set: an exercise from the user's own catalog (built-in or custom-added) with
+// weight and reps. Validated against their saved catalog, not just the fixed defaults, so
+// custom exercises they've added on the setup page can be logged too.
 app.post('/api/workouts', route(async (req, res) => {
   const { category, exercise, weight, reps, date, time } = req.body;
-  if (!isValidExercise(category, exercise)) {
+  const catalog = (await readExerciseCatalog(req.uid)) ?? EXERCISES;
+  if (typeof exercise !== 'string' || !catalog[category]?.includes(exercise)) {
     return res.status(400).json({ error: 'Unrecognized category or exercise.' });
   }
   const w = Number(weight);

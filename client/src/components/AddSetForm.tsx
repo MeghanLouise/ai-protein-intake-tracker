@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { errorMessage } from '../api';
-import { CATEGORIES, EXERCISES } from '../workouts';
+import type { ExerciseCatalog } from '../types';
+import { CATEGORIES } from '../workouts';
 import Spinner from './Spinner';
 
 interface Props {
+  // The user's chosen exercises per day type (see WorkoutSetup); falls back to the app defaults.
+  catalog: ExerciseCatalog;
   onAdd: (category: string, exercise: string, weight: number, reps: number) => Promise<void>;
 }
 
 // Pick a day type, pick an exercise from that day's list, log the weight and reps.
-export default function AddSetForm({ onAdd }: Props) {
+export default function AddSetForm({ catalog, onAdd }: Props) {
   const [category, setCategory] = useState<string | null>(null);
   const [exercise, setExercise] = useState('');
   const [weight, setWeight] = useState('');
@@ -19,7 +22,7 @@ export default function AddSetForm({ onAdd }: Props) {
   // Also how you switch day types later: the grid stays visible and clickable once one is picked.
   const pickCategory = (next: string) => {
     setCategory(next);
-    setExercise(EXERCISES[next][0]);
+    setExercise(catalog[next][0]);
     setStatus('');
   };
 
@@ -65,7 +68,7 @@ export default function AddSetForm({ onAdd }: Props) {
           <label>
             Exercise
             <select value={exercise} onChange={(e) => setExercise(e.target.value)}>
-              {EXERCISES[category].map((ex) => (
+              {catalog[category].map((ex) => (
                 <option key={ex} value={ex}>
                   {ex}
                 </option>

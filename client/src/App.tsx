@@ -8,6 +8,7 @@ import SignIn from './components/SignIn';
 import Spinner from './components/Spinner';
 import SupplementsPage from './components/SupplementsPage';
 import Tracker from './components/Tracker';
+import WorkoutSetup from './components/WorkoutSetup';
 import WorkoutTracker from './components/WorkoutTracker';
 import { pageInfo } from './pages';
 import { useAuth } from './useAuth';
@@ -68,6 +69,8 @@ export default function App() {
         <CalendarView key={user.uid} />
       ) : path === '/workout' ? (
         <WorkoutTracker key={user.uid} />
+      ) : path === '/workout-setup' ? (
+        <WorkoutSetup key={user.uid} />
       ) : path === '/supplements' ? (
         <SupplementsPage key={user.uid} />
       ) : (
@@ -79,7 +82,13 @@ export default function App() {
 
   // Drives the per-page accent colors in index.css (a subtle way to tell pages apart).
   const pageKey =
-    path === '/calendar' ? 'calendar' : path === '/workout' ? 'workout' : path === '/supplements' ? 'supplements' : 'today';
+    path === '/calendar'
+      ? 'calendar'
+      : path === '/workout' || path === '/workout-setup'
+        ? 'workout'
+        : path === '/supplements'
+          ? 'supplements'
+          : 'today';
 
   // The big heading matches whatever this page is called in the menu (see pages.ts).
   const current = pageInfo(path);

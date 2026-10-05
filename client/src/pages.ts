@@ -10,6 +10,7 @@ export const PAGES: PageInfo[] = [
   { path: '/', title: 'Protein', accent: 'tracker' },
   { path: '/calendar', title: 'Calendar', accent: 'view' },
   { path: '/workout', title: 'Workout', accent: 'tracker' },
+  { path: '/workout-setup', title: 'Workout', accent: 'setup' },
   { path: '/supplements', title: '', accent: 'Supplements' },
 ];
 

@@ -7,20 +7,22 @@ import {
   getWorkouts,
   todayDate,
 } from '../api';
-import type { TodayResponse } from '../types';
+import type { TodayResponse, WorkoutSet } from '../types';
 import { usePreferences } from '../usePreferences';
 import DaySummary from './DaySummary';
 import DisplayToggles from './DisplayToggles';
 import EntryList from './EntryList';
 import MonthCalendar from './MonthCalendar';
 import Spinner from './Spinner';
+import WorkoutEntryList from './WorkoutEntryList';
 
 // A date picker plus that day's totals and log. Reuses the same /api/today endpoint as the
 // tracker, which accepts any date, not only today.
 export default function CalendarView() {
   const [date, setDate] = useState(todayDate());
   const [day, setDay] = useState<TodayResponse | null>(null);
-  const [workoutCategories, setWorkoutCategories] = useState<string[] | null>(null);
+  const [workouts, setWorkouts] = useState<WorkoutSet[] | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [supplementsTotal, setSupplementsTotal] = useState(0);
   const [supplementsTaken, setSupplementsTaken] = useState(0);
   const [error, setError] = useState('');
@@ -36,13 +38,14 @@ export default function CalendarView() {
   useEffect(() => {
     let cancelled = false;
     setDay(null);
-    setWorkoutCategories(null);
+    setWorkouts(null);
+    setSelectedCategory(null); // the previous selection may not exist on the new date
     setError('');
     Promise.all([getDay(date), getWorkouts(date), getSupplementChecks(date)])
       .then(([dayRes, workoutsRes, checksRes]) => {
         if (cancelled) return;
         setDay(dayRes);
-        setWorkoutCategories([...new Set(workoutsRes.workouts.map((w) => w.category))]);
+        setWorkouts(workoutsRes.workouts);
         setSupplementsTaken(checksRes.taken.length);
       })
       .catch((err) => !cancelled && setError(errorMessage(err)));
@@ -56,6 +59,9 @@ export default function CalendarView() {
     month: 'long',
     day: 'numeric',
   });
+
+  const workoutCategories = workouts ? [...new Set(workouts.map((w) => w.category))] : [];
+  const selectedSets = workouts?.filter((w) => w.category === selectedCategory) ?? [];
 
   return (
     <div className="layout">
@@ -84,12 +90,19 @@ export default function CalendarView() {
       </div>
       <div className="column">
         {error && <p className="error" role="alert">{error}</p>}
-        {workoutCategories && (
+        {workouts && (
           <DaySummary
             workoutCategories={workoutCategories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={(category) =>
+              setSelectedCategory((prev) => (prev === category ? null : category))
+            }
             supplementsTotal={supplementsTotal}
             supplementsTaken={supplementsTaken}
           />
+        )}
+        {selectedCategory && (
+          <WorkoutEntryList sets={selectedSets} title={`${selectedCategory} · ${heading}`} />
         )}
         {day && (
           <EntryList

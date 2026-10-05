@@ -2,6 +2,8 @@ import { auth } from './firebase';
 import type {
   Entry,
   Estimate,
+  ExerciseCatalog,
+  ExerciseCatalogResponse,
   ImagePayload,
   SupplementChecksResponse,
   SupplementsResponse,
@@ -70,6 +72,11 @@ export const saveWorkout = (category: string, exercise: string, weight: number, 
     date: localDate(),
     time: localTime(),
   });
+
+export const getExerciseCatalog = () => request<ExerciseCatalogResponse>('/api/exercise-catalog');
+
+export const saveExerciseCatalog = (catalog: ExerciseCatalog) =>
+  request<{ catalog: ExerciseCatalog }>('/api/exercise-catalog', 'PUT', { catalog });
 
 export const getSupplements = () => request<SupplementsResponse>('/api/supplements');
 

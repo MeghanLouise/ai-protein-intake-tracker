@@ -611,6 +611,32 @@ select:focus {
   color: var(--mocha-dark);
 }
 
+.day-summary-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.chip {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--espresso);
+  background: var(--cream);
+  border: 1px solid var(--sand);
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.chip.is-selected {
+  color: var(--white);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
 /* Supplements */
 .checklist {
   list-style: none;
@@ -738,6 +764,62 @@ select:focus {
   color: var(--white);
   background: var(--accent);
   border-color: var(--accent);
+}
+
+/* Workout setup */
+.exercise-group {
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border: none;
+}
+
+.exercise-group legend {
+  padding: 0 0 0.6rem;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1rem;
+}
+
+.checkbox {
+  display: flex;
+  flex-direction: row; /* overrides the generic label { flex-direction: column } rule */
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 0.55rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--espresso);
+  cursor: pointer;
+}
+
+.add-exercise-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.add-exercise-row input {
+  flex: 1;
+}
+
+.add-exercise-row button {
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.checkbox input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 /* Buttons */
