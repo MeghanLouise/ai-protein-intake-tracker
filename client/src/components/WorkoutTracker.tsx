@@ -9,6 +9,7 @@ import WorkoutEntryList from './WorkoutEntryList';
 export default function WorkoutTracker() {
   const [sets, setSets] = useState<WorkoutSet[] | null>(null);
   const [catalog, setCatalog] = useState<ExerciseCatalog | null>(null);
+  const [duplicating, setDuplicating] = useState(false);
   const [error, setError] = useState('');
 
   const refresh = useCallback(async () => {
@@ -31,6 +32,19 @@ export default function WorkoutTracker() {
     await refresh();
   };
 
+  // One click to log another set with the same exercise, weight and reps as an existing one.
+  const duplicateSet = async (set: WorkoutSet) => {
+    setDuplicating(true);
+    setError('');
+    try {
+      await addSet(set.category, set.exercise, set.weight, set.reps);
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setDuplicating(false);
+    }
+  };
+
   return (
     <>
       {error && <p className="error" role="alert">{error}</p>}
@@ -40,7 +54,7 @@ export default function WorkoutTracker() {
             <AddSetForm catalog={catalog} onAdd={addSet} />
           </div>
           <div className="column">
-            <WorkoutEntryList sets={sets} />
+            <WorkoutEntryList sets={sets} onDuplicate={duplicateSet} duplicating={duplicating} />
           </div>
         </div>
       ) : !error ? (
