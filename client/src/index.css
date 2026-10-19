@@ -3,12 +3,12 @@
 :root {
   color-scheme: dark;
 
-  /* Palette: dark charcoal surfaces with soft neutral text.
-     --cream doubles as the page background AND sunken insets (inputs, chips) so those
-     insets read as "cut into" the page; --surface is the raised card/panel tone on top. */
-  --cream: #1c1b21;
-  --surface: #242329;
-  --linen: #302e36;
+  /* Palette: a muted sage/slate gradient backdrop with frosted-glass cards on top.
+     --cream is the sunken inset tone (inputs, chips) — a translucent dark overlay so it reads
+     as "cut into" whatever surface it sits on; --surface is the frosted card tone on top. */
+  --cream: rgba(0, 0, 0, 0.22);
+  --surface: rgba(255, 255, 255, 0.1);
+  --linen: rgba(255, 255, 255, 0.14);
   --sand: #46434c;
   --white: #fdfdfc;
   --on-light: #1a1a1a;
@@ -75,9 +75,8 @@ body {
   min-height: 100vh;
   font-family: var(--font-sans);
   color: var(--espresso);
-  background:
-    radial-gradient(60rem 30rem at 50% -10rem, #2a2831 0%, transparent 70%),
-    var(--cream);
+  background: linear-gradient(135deg, #3f4e4a 0%, #647d73 55%, #8d9f93 100%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -95,8 +94,9 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(22, 21, 26, 0.88);
-  backdrop-filter: blur(8px);
+  background: rgba(37, 46, 43, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--linen);
 }
 
@@ -152,6 +152,8 @@ body {
   border: 1px solid var(--linen);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .menu-account {
@@ -280,6 +282,8 @@ h2 {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 1.5rem;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 @media (max-width: 30rem) {
