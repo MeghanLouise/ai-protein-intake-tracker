@@ -25,9 +25,14 @@ function levelFor(count: number) {
 const RADIUS = 26;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
+interface Props {
+  // Bumped by the parent after a set is added/duplicated/deleted, to refetch without remounting.
+  refreshToken: number;
+}
+
 // A GitHub-style "how often have you trained" heatmap, plus a ring showing days trained this
 // week, built from the per-day set counts the backend returns for a date range.
-export default function ActivityHeatmap() {
+export default function ActivityHeatmap({ refreshToken }: Props) {
   const [activity, setActivity] = useState<WorkoutActivityResponse | null>(null);
   const [error, setError] = useState('');
 
@@ -42,7 +47,7 @@ export default function ActivityHeatmap() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshToken]);
 
   // A broken heatmap shouldn't block logging a set, so it just quietly doesn't render.
   if (error) return null;

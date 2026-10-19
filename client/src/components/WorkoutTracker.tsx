@@ -86,7 +86,7 @@ export default function WorkoutTracker() {
       ) : !error ? (
         <Spinner label="Loading today's workout…" />
       ) : null}
-      {sets && catalog && <ActivityHeatmap key={refreshCount} />}
+      {sets && catalog && <ActivityHeatmap refreshToken={refreshCount} />}
     </>
   );
 }
