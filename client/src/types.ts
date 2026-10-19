@@ -52,6 +52,14 @@ export interface LastWorkoutResponse {
   workouts: WorkoutSet[];
 }
 
+// How many sets were logged on each day in a range, for the activity heatmap. Only dates with
+// at least one set are present as keys.
+export interface WorkoutActivityResponse {
+  from: string;
+  to: string;
+  counts: Record<string, number>;
+}
+
 // One exercise list per day type, e.g. { 'Push day': ['Bench Press', ...], ... }.
 export type ExerciseCatalog = Record<string, string[]>;
 

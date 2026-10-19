@@ -82,6 +82,22 @@ export async function deleteWorkout(uid, id) {
   await userDoc(uid).collection('workouts').doc(id).delete();
 }
 
+// How many sets were logged on each date in a range, for a heatmap/streak view. Only dates with
+// at least one set appear in the result. Date strings compare correctly as plain text.
+export async function readWorkoutActivity(uid, fromDate, toDate) {
+  const snap = await userDoc(uid)
+    .collection('workouts')
+    .where('date', '>=', fromDate)
+    .where('date', '<=', toDate)
+    .get();
+  const counts = {};
+  for (const doc of snap.docs) {
+    const { date } = doc.data();
+    counts[date] = (counts[date] ?? 0) + 1;
+  }
+  return counts;
+}
+
 // The most recent earlier session for a day type — e.g. "what did I do last Push day?" — so it
 // can be shown for reference while logging today. Date strings sort correctly as plain text
 // (YYYY-MM-DD), so no date parsing is needed to find the most recent one before `beforeDate`.

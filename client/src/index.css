@@ -53,10 +53,21 @@
   --accent-dark: #71905c;
 }
 
-/* The workout tracker gets plainer, less decorative type than the rest of the app. */
+/* The workout tracker gets plainer, less decorative type than the rest of the app: bold sans
+   headings instead of the italic serif used everywhere else. */
+[data-page='workout'] h1,
 [data-page='workout'] h2,
 [data-page='workout'] .figure {
   font-family: var(--font-sans);
+}
+
+[data-page='workout'] h1 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+[data-page='workout'] h1 em {
+  font-style: normal;
 }
 
 body {
@@ -1213,6 +1224,124 @@ input[type='password'] {
 .empty {
   margin: 0;
   color: var(--taupe);
+}
+
+/* Activity heatmap + weekly ring (workout tracker) */
+.activity-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.activity-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.activity-ring {
+  position: relative;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+}
+
+.activity-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.activity-ring-track,
+.activity-ring-fill {
+  fill: none;
+  stroke-width: 6;
+}
+
+.activity-ring-track {
+  stroke: var(--linen);
+}
+
+.activity-ring-fill {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.activity-ring-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.activity-title {
+  margin: 0 0 0.15rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.heatmap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  overflow-x: auto;
+}
+
+.heatmap-months {
+  display: flex;
+  gap: 3px;
+  font-size: 0.7rem;
+  color: var(--taupe);
+}
+
+.heatmap-months span {
+  width: 0.8rem;
+  flex-shrink: 0;
+}
+
+.heatmap-grid {
+  display: flex;
+  gap: 3px;
+}
+
+.heatmap-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.heatmap-dot {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 0.2rem;
+  background: var(--linen);
+  flex-shrink: 0;
+}
+
+.heatmap-dot.is-future {
+  background: transparent;
+}
+
+.heatmap-dot.level-1 {
+  background: color-mix(in srgb, var(--accent) 35%, var(--linen));
+}
+
+.heatmap-dot.level-2 {
+  background: color-mix(in srgb, var(--accent) 60%, var(--linen));
+}
+
+.heatmap-dot.level-3 {
+  background: color-mix(in srgb, var(--accent) 85%, var(--linen));
+}
+
+.heatmap-dot.level-4 {
+  background: var(--accent);
 }
 
 @media (prefers-reduced-motion: reduce) {

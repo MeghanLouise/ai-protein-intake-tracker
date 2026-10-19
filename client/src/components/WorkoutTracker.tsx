@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { deleteWorkout, errorMessage, getExerciseCatalog, getWorkouts, saveWorkout, todayDate } from '../api';
 import type { ExerciseCatalog, WorkoutSet } from '../types';
+import ActivityHeatmap from './ActivityHeatmap';
 import AddSetForm from './AddSetForm';
 import Spinner from './Spinner';
 import WorkoutEntryList from './WorkoutEntryList';
@@ -12,6 +13,9 @@ export default function WorkoutTracker() {
   const [duplicating, setDuplicating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
+  // Bumped on every refresh so <ActivityHeatmap> (which only fetches once on mount) remounts and
+  // picks up today's latest count after a set is added, duplicated, or deleted.
+  const [refreshCount, setRefreshCount] = useState(0);
 
   const refresh = useCallback(async () => {
     try {
@@ -19,6 +23,7 @@ export default function WorkoutTracker() {
       setSets(today.workouts);
       setCatalog(exercises.catalog);
       setError('');
+      setRefreshCount((c) => c + 1);
     } catch (err) {
       setError(errorMessage(err));
     }
@@ -81,6 +86,7 @@ export default function WorkoutTracker() {
       ) : !error ? (
         <Spinner label="Loading today's workout…" />
       ) : null}
+      {sets && catalog && <ActivityHeatmap key={refreshCount} />}
     </>
   );
 }

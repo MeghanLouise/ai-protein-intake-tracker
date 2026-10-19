@@ -15,6 +15,7 @@ import {
   readLastWorkoutSession,
   readSupplementChecks,
   readSupplements,
+  readWorkoutActivity,
   readWorkouts,
   removeSupplement,
   setSupplementCheck,
@@ -157,6 +158,14 @@ app.delete('/api/workouts/:id', route(async (req, res) => {
   }
   await deleteWorkout(req.uid, req.params.id);
   res.json({ ok: true });
+}));
+
+// How many sets were logged on each day in a range, e.g. for a streak/heatmap view. The browser
+// picks the range so it lines up with its own local "today", same as the other date params here.
+app.get('/api/workouts/activity', route(async (req, res) => {
+  const to = pick(req.query.to, DATE_RE, todayString());
+  const from = pick(req.query.from, DATE_RE, to);
+  res.json({ from, to, counts: await readWorkoutActivity(req.uid, from, to) });
 }));
 
 // The most recent earlier session logged for a day type, e.g. "what did I do last Push day?"

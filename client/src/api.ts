@@ -9,6 +9,7 @@ import type {
   SupplementChecksResponse,
   SupplementsResponse,
   TodayResponse,
+  WorkoutActivityResponse,
   WorkoutSet,
   WorkoutsResponse,
 } from './types';
@@ -81,6 +82,9 @@ export const getLastWorkout = (category: string) =>
   request<LastWorkoutResponse>(
     `/api/workouts/last?category=${encodeURIComponent(category)}&before=${localDate()}`,
   );
+
+export const getWorkoutActivity = (from: string, to: string) =>
+  request<WorkoutActivityResponse>(`/api/workouts/activity?from=${from}&to=${to}`);
 
 export const getExerciseCatalog = () => request<ExerciseCatalogResponse>('/api/exercise-catalog');
 
