@@ -32,6 +32,7 @@ export interface ImagePayload {
 }
 
 export interface WorkoutSet {
+  id: string;
   date: string;
   time: string;
   category: string;
@@ -42,6 +43,12 @@ export interface WorkoutSet {
 
 export interface WorkoutsResponse {
   date: string;
+  workouts: WorkoutSet[];
+}
+
+// The most recent earlier session logged for a day type. `date` is null if there isn't one yet.
+export interface LastWorkoutResponse {
+  date: string | null;
   workouts: WorkoutSet[];
 }
 

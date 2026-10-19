@@ -6,11 +6,13 @@ import {
   addEntry,
   addSupplement,
   addWorkout,
+  deleteWorkout,
   isActivated,
   markActivated,
   readEntries,
   readExerciseCatalog,
   readGoal,
+  readLastWorkoutSession,
   readSupplementChecks,
   readSupplements,
   readWorkouts,
@@ -146,6 +148,23 @@ app.post('/api/workouts', route(async (req, res) => {
     time: pick(time, TIME_RE, new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })),
   };
   res.status(201).json(await addWorkout(req.uid, set));
+}));
+
+// Remove a logged set, e.g. one added by mistake. Scoped to the caller's own workouts.
+app.delete('/api/workouts/:id', route(async (req, res) => {
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(req.params.id)) {
+    return res.status(400).json({ error: 'Invalid set id.' });
+  }
+  await deleteWorkout(req.uid, req.params.id);
+  res.json({ ok: true });
+}));
+
+// The most recent earlier session logged for a day type, e.g. "what did I do last Push day?"
+app.get('/api/workouts/last', route(async (req, res) => {
+  const category = String(req.query.category || '');
+  if (!EXERCISES[category]) return res.status(400).json({ error: 'Unrecognized category.' });
+  const before = pick(req.query.before, DATE_RE, todayString());
+  res.json(await readLastWorkoutSession(req.uid, category, before));
 }));
 
 // The exercises available for each day type: the user's picks, or the defaults if unset.

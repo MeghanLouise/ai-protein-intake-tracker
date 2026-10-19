@@ -29,3 +29,16 @@ export const EXERCISES: Record<string, string[]> = {
 };
 
 export const CATEGORIES = Object.keys(EXERCISES);
+
+// How many times each weight/reps combo shows up in a list of sets, e.g. for a "×3" pill next
+// to a set that was repeated. Keyed by "weight-reps" so 0 and "0" can't collide with lookups.
+export function repeatCounts(sets: { weight: number; reps: number }[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const { weight, reps } of sets) {
+    const key = `${weight}-${reps}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
+}
+
+export const repeatKey = (set: { weight: number; reps: number }) => `${set.weight}-${set.reps}`;

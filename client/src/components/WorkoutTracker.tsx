@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { errorMessage, getExerciseCatalog, getWorkouts, saveWorkout, todayDate } from '../api';
+import { deleteWorkout, errorMessage, getExerciseCatalog, getWorkouts, saveWorkout, todayDate } from '../api';
 import type { ExerciseCatalog, WorkoutSet } from '../types';
 import AddSetForm from './AddSetForm';
 import Spinner from './Spinner';
@@ -10,6 +10,7 @@ export default function WorkoutTracker() {
   const [sets, setSets] = useState<WorkoutSet[] | null>(null);
   const [catalog, setCatalog] = useState<ExerciseCatalog | null>(null);
   const [duplicating, setDuplicating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
 
   const refresh = useCallback(async () => {
@@ -45,6 +46,20 @@ export default function WorkoutTracker() {
     }
   };
 
+  // Remove a set added by mistake.
+  const deleteSet = async (set: WorkoutSet) => {
+    setDeleting(true);
+    setError('');
+    try {
+      await deleteWorkout(set.id);
+      await refresh();
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <>
       {error && <p className="error" role="alert">{error}</p>}
@@ -54,7 +69,13 @@ export default function WorkoutTracker() {
             <AddSetForm catalog={catalog} onAdd={addSet} />
           </div>
           <div className="column">
-            <WorkoutEntryList sets={sets} onDuplicate={duplicateSet} duplicating={duplicating} />
+            <WorkoutEntryList
+              sets={sets}
+              onDuplicate={duplicateSet}
+              duplicating={duplicating}
+              onDelete={deleteSet}
+              deleting={deleting}
+            />
           </div>
         </div>
       ) : !error ? (

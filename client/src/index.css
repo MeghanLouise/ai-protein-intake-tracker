@@ -1,29 +1,35 @@
 /* Global styles. Components use plain class names (see components/), so each piece is easy to restyle. */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  /* Palette: soft greys and black */
-  --cream: #f2f1ef;
-  --linen: #e5e3e0;
-  --sand: #d3d0cc;
+  /* Palette: dark charcoal surfaces with soft neutral text.
+     --cream doubles as the page background AND sunken insets (inputs, chips) so those
+     insets read as "cut into" the page; --surface is the raised card/panel tone on top. */
+  --cream: #1c1b21;
+  --surface: #242329;
+  --linen: #302e36;
+  --sand: #46434c;
   --white: #fdfdfc;
-  --mocha: #6a6764;
-  --mocha-dark: #2b2a29;
-  --espresso: #161616;
-  --taupe: #8b8884;
-  --error: #a4483a;
+  --on-light: #1a1a1a;
+  --mocha: #9d99a3;
+  --mocha-dark: #d8d5da;
+  --espresso: #f4f3f5;
+  --ink: #2c2a32;
+  --ink-hover: #3c3a43;
+  --taupe: #96939b;
+  --error: #e3897a;
 
-  /* Per-page accent: overridden per [data-page] below. Default (today) stays neutral black/grey. */
-  --accent: var(--espresso);
-  --accent-dark: var(--mocha-dark);
+  /* Per-page accent: overridden per [data-page] below. Default (today) is a warm gold. */
+  --accent: #c9a26a;
+  --accent-dark: #a9824f;
 
   --font-serif: 'Instrument Serif', Georgia, serif;
   --font-sans: 'DM Sans', system-ui, sans-serif;
 
   --radius: 1.5rem;
   --radius-sm: 0.9rem;
-  --shadow: 0 1px 2px rgba(20, 20, 20, 0.05), 0 12px 32px -12px rgba(20, 20, 20, 0.16);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
 }
 
 * {
@@ -31,20 +37,26 @@
 }
 
 /* Each page tints its wordmark, progress fill, and selected/active states with its own accent,
-   layered on top of the shared black-and-grey base — a subtle way to tell pages apart. */
+   layered on top of the shared dark/grey base — a subtle way to tell pages apart. */
 [data-page='calendar'] {
-  --accent: #3f5b66;
-  --accent-dark: #2f454e;
+  --accent: #6f9aa8;
+  --accent-dark: #577e8a;
 }
 
 [data-page='workout'] {
-  --accent: #8a4a35;
-  --accent-dark: #6c3a29;
+  --accent: #c17a56;
+  --accent-dark: #a3603f;
 }
 
 [data-page='supplements'] {
-  --accent: #55684a;
-  --accent-dark: #414f38;
+  --accent: #8bab73;
+  --accent-dark: #71905c;
+}
+
+/* The workout tracker gets plainer, less decorative type than the rest of the app. */
+[data-page='workout'] h2,
+[data-page='workout'] .figure {
+  font-family: var(--font-sans);
 }
 
 body {
@@ -53,7 +65,7 @@ body {
   font-family: var(--font-sans);
   color: var(--espresso);
   background:
-    radial-gradient(60rem 30rem at 50% -10rem, #f9f8f7 0%, transparent 70%),
+    radial-gradient(60rem 30rem at 50% -10rem, #2a2831 0%, transparent 70%),
     var(--cream);
   -webkit-font-smoothing: antialiased;
 }
@@ -72,7 +84,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(253, 253, 252, 0.9);
+  background: rgba(22, 21, 26, 0.88);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--linen);
 }
@@ -113,7 +125,7 @@ body {
 }
 
 .menu-trigger:hover:not(:disabled) {
-  background: var(--cream);
+  background: var(--linen);
 }
 
 .menu-dropdown {
@@ -125,7 +137,7 @@ body {
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.5rem;
-  background: var(--white);
+  background: var(--surface);
   border: 1px solid var(--linen);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
@@ -153,7 +165,7 @@ body {
 }
 
 .menu-dropdown button:hover:not(:disabled) {
-  background: var(--cream);
+  background: var(--linen);
 }
 
 /* Cards stack on phones; on wider screens the tracker sits beside today's log. */
@@ -222,13 +234,47 @@ h2 {
   font-size: 1.6rem;
 }
 
+/* On phones, shrink the sticky header and masthead so more of the page fits without scrolling. */
+@media (max-width: 30rem) {
+  .menu-bar-inner {
+    padding: 0.6rem 1.25rem;
+  }
+
+  .menu-bar .brand {
+    font-size: 1rem;
+  }
+
+  .app {
+    padding: 1.1rem 1.25rem 3rem;
+    gap: 1rem;
+  }
+
+  .masthead {
+    margin-bottom: 0.25rem;
+  }
+
+  h1 {
+    font-size: 1.9rem;
+  }
+
+  .date {
+    margin-top: 0.3rem;
+  }
+}
+
 /* Cards */
 .card {
-  background: var(--white);
+  background: var(--surface);
   border: 1px solid var(--linen);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 1.5rem;
+}
+
+@media (max-width: 30rem) {
+  .card {
+    padding: 1.1rem;
+  }
 }
 
 .eyebrow {
@@ -269,7 +315,7 @@ h2 {
 .bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #a8a5a1, var(--accent));
+  background: linear-gradient(90deg, #55525c, var(--accent));
   transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s;
 }
 
@@ -298,8 +344,8 @@ h2 {
 
 /* Buttons with a light background (e.g. the Google button) need a dark spinner instead. */
 button.google .spinner {
-  border-color: var(--linen);
-  border-top-color: var(--espresso);
+  border-color: #d8d5da;
+  border-top-color: var(--on-light);
 }
 
 .spinner-row {
@@ -353,7 +399,7 @@ button.google .spinner {
 }
 
 .calendar-nav:hover:not(:disabled) {
-  background: var(--cream);
+  background: var(--linen);
 }
 
 .calendar-grid {
@@ -381,7 +427,7 @@ button.google .spinner {
 }
 
 .calendar-day:hover:not(:disabled) {
-  background: var(--cream);
+  background: var(--linen);
 }
 
 .calendar-day.is-today {
@@ -434,15 +480,15 @@ input[type='number'] {
 }
 
 textarea::placeholder {
-  color: #b0aca8;
+  color: #6f6c76;
 }
 
 textarea:focus,
 input:focus {
   outline: none;
-  background: var(--white);
+  background: var(--surface);
   border-color: var(--mocha);
-  box-shadow: 0 0 0 4px rgba(22, 22, 22, 0.1);
+  box-shadow: 0 0 0 4px rgba(253, 253, 252, 0.08);
 }
 
 .row {
@@ -474,9 +520,9 @@ select {
 
 select:focus {
   outline: none;
-  background: var(--white);
+  background: var(--surface);
   border-color: var(--mocha);
-  box-shadow: 0 0 0 4px rgba(22, 22, 22, 0.1);
+  box-shadow: 0 0 0 4px rgba(253, 253, 252, 0.08);
 }
 
 /* Extra nutrients (calories, fiber) */
@@ -552,7 +598,7 @@ select:focus {
   height: 1.1rem;
   background: var(--white);
   border-radius: 50%;
-  box-shadow: 0 1px 2px rgba(20, 20, 20, 0.25);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -698,7 +744,7 @@ select:focus {
   width: 1.3rem;
   height: 1.3rem;
   flex-shrink: 0;
-  background: var(--white);
+  background: var(--surface);
   border: 1.5px solid var(--sand);
   border-radius: 50%;
   transition: background 0.15s, border-color 0.15s;
@@ -764,6 +810,18 @@ select:focus {
   color: var(--white);
   background: var(--accent);
   border-color: var(--accent);
+}
+
+@media (max-width: 30rem) {
+  .category-grid {
+    gap: 0.45rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .category-btn {
+    padding: 0.65rem;
+    font-size: 0.85rem;
+  }
 }
 
 /* Workout setup */
@@ -832,7 +890,7 @@ button {
   font-weight: 500;
   cursor: pointer;
   color: var(--white);
-  background: var(--espresso);
+  background: var(--ink);
   border: none;
   border-radius: 999px;
   padding: 0.85rem 1.5rem;
@@ -840,7 +898,7 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background: var(--mocha-dark);
+  background: var(--ink-hover);
 }
 
 button:active:not(:disabled) {
@@ -921,6 +979,43 @@ button.link:hover:not(:disabled) {
   border-radius: var(--radius-sm);
 }
 
+/* "Last Push day" reference box in AddSetForm */
+.last-session {
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+}
+
+.last-session .eyebrow {
+  margin-bottom: 0;
+}
+
+.last-session-list {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.last-session-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--espresso);
+}
+
+.last-session-list .figure {
+  font-size: 1rem;
+  color: var(--mocha-dark);
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
 .status {
   margin: 0.9rem 0 0;
   font-size: 0.85rem;
@@ -936,7 +1031,7 @@ button.link:hover:not(:disabled) {
   padding: 0.8rem 1rem;
   font-size: 0.9rem;
   color: var(--error);
-  background: #f8ebe7;
+  background: #3a2420;
   border-radius: var(--radius-sm);
 }
 
@@ -960,13 +1055,13 @@ button.link:hover:not(:disabled) {
 }
 
 button.google {
-  color: var(--espresso);
+  color: var(--on-light);
   background: var(--white);
   border: 1px solid var(--sand);
 }
 
 button.google:hover:not(:disabled) {
-  background: var(--cream);
+  background: #f1f0ee;
 }
 
 .divider {
@@ -1033,9 +1128,9 @@ input[type='password'] {
   border-top: 1px solid var(--linen);
 }
 
-/* The workout tracker's "today" list gets a 4th column for the repeat-set button. */
+/* The workout tracker's "today" list gets extra columns for the repeat/delete buttons. */
 .has-duplicate li {
-  grid-template-columns: 3.25rem 1fr auto auto;
+  grid-template-columns: 3.25rem 1fr auto auto auto;
 }
 
 .entry-log li:first-child {
@@ -1069,9 +1164,26 @@ input[type='password'] {
   font-size: 1.35rem;
   color: var(--mocha-dark);
   white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
 }
 
-.duplicate-btn {
+/* Small badge showing how many times the same weight × reps was logged. */
+.pill {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--taupe);
+  background: var(--linen);
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  white-space: nowrap;
+}
+
+.duplicate-btn,
+.delete-btn {
   width: 1.75rem;
   height: 1.75rem;
   padding: 0;
@@ -1085,8 +1197,17 @@ input[type='password'] {
 }
 
 .duplicate-btn:hover:not(:disabled) {
-  background: var(--cream);
+  background: var(--linen);
   border-color: var(--accent);
+}
+
+.delete-btn {
+  color: var(--error);
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: var(--linen);
+  border-color: var(--error);
 }
 
 .empty {

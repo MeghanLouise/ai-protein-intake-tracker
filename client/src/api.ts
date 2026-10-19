@@ -5,6 +5,7 @@ import type {
   ExerciseCatalog,
   ExerciseCatalogResponse,
   ImagePayload,
+  LastWorkoutResponse,
   SupplementChecksResponse,
   SupplementsResponse,
   TodayResponse,
@@ -72,6 +73,14 @@ export const saveWorkout = (category: string, exercise: string, weight: number, 
     date: localDate(),
     time: localTime(),
   });
+
+export const deleteWorkout = (id: string) => request<{ ok: true }>(`/api/workouts/${id}`, 'DELETE');
+
+// The most recent earlier session logged for a day type, e.g. "what did I do last Push day?"
+export const getLastWorkout = (category: string) =>
+  request<LastWorkoutResponse>(
+    `/api/workouts/last?category=${encodeURIComponent(category)}&before=${localDate()}`,
+  );
 
 export const getExerciseCatalog = () => request<ExerciseCatalogResponse>('/api/exercise-catalog');
 
