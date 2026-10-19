@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { errorMessage, getMe } from './api';
 import { firebaseConfigured } from './firebase';
+import BottomNav from './components/BottomNav';
 import CalendarView from './components/CalendarView';
 import InviteGate from './components/InviteGate';
 import MenuBar from './components/MenuBar';
@@ -114,6 +115,9 @@ export default function App() {
         </header>
         {content}
       </main>
+      {firebaseConfigured && (
+        <BottomNav currentPath={activated ? path : undefined} onNavigate={navigate} />
+      )}
     </div>
   );
 }
