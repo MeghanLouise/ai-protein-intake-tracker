@@ -7,17 +7,17 @@
      --cream is the sunken inset tone (inputs, chips) — a translucent dark overlay so it reads
      as "cut into" whatever surface it sits on; --surface is the frosted card tone on top. */
   --cream: rgba(0, 0, 0, 0.22);
-  --surface: rgba(255, 255, 255, 0.1);
+  --surface: rgba(16, 24, 21, 0.42);
   --linen: rgba(255, 255, 255, 0.14);
   --sand: #46434c;
   --white: #fdfdfc;
   --on-light: #1a1a1a;
-  --mocha: #9d99a3;
-  --mocha-dark: #d8d5da;
+  --mocha: #b2aeb9;
+  --mocha-dark: #e2dfe4;
   --espresso: #f4f3f5;
   --ink: #2c2a32;
   --ink-hover: #3c3a43;
-  --taupe: #96939b;
+  --taupe: #c8c5cf;
   --error: #e3897a;
 
   /* Per-page accent: overridden per [data-page] below. Default (today) is a warm gold. */
