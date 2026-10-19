@@ -1,5 +1,5 @@
 import type { WorkoutSet } from '../types';
-import { repeatCounts, repeatKey } from '../workouts';
+import { groupSets } from '../workouts';
 
 interface Props {
   sets: WorkoutSet[];
@@ -21,7 +21,6 @@ export default function WorkoutEntryList({
   onDelete,
   deleting,
 }: Props) {
-  const counts = repeatCounts(sets);
   return (
     <section className={'card entry-log' + (onDuplicate ? ' has-duplicate' : '')}>
       <h2>{title}</h2>
@@ -29,8 +28,10 @@ export default function WorkoutEntryList({
         <p className="empty">No sets logged yet. Pick a day type to start.</p>
       ) : (
         <ul>
-          {sets.map((s) => {
-            const count = counts.get(repeatKey(s)) ?? 1;
+          {groupSets(sets).map((group) => {
+            const s = group[0];
+            // Deleting a repeated row removes just the newest one logged, not the whole group.
+            const newest = group[group.length - 1];
             return (
               <li key={s.id}>
                 <span className="time">{s.time}</span>
@@ -40,7 +41,7 @@ export default function WorkoutEntryList({
                 </span>
                 <span className="figure">
                   {s.weight}&nbsp;&times;&nbsp;{s.reps}
-                  {count > 1 && <span className="pill">&times;{count}</span>}
+                  {group.length > 1 && <span className="pill">&times;{group.length}</span>}
                 </span>
                 {onDuplicate && (
                   <button
@@ -61,7 +62,7 @@ export default function WorkoutEntryList({
                     aria-label={`Delete ${s.exercise}: ${s.weight} × ${s.reps}`}
                     title="Delete this set"
                     disabled={deleting}
-                    onClick={() => onDelete(s)}
+                    onClick={() => onDelete(newest)}
                   >
                     &#215;
                   </button>

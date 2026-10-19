@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { errorMessage, getLastWorkout } from '../api';
 import type { ExerciseCatalog, LastWorkoutResponse, WorkoutSet } from '../types';
-import { CATEGORIES, repeatCounts, repeatKey } from '../workouts';
+import { CATEGORIES, groupSets } from '../workouts';
 import Spinner from './Spinner';
 
 interface Props {
@@ -35,18 +35,17 @@ function LastSession({
     );
   }
 
-  const counts = repeatCounts(matching);
   return (
     <div className="last-session">
       <p className="eyebrow">Last {exercise} · {formatDate(date)}</p>
       <ul className="last-session-list">
-        {matching.map((w, i) => {
-          const count = counts.get(repeatKey(w)) ?? 1;
+        {groupSets(matching).map((group) => {
+          const w = group[0];
           return (
-            <li key={i}>
+            <li key={`${w.weight}-${w.reps}`}>
               <span className="figure">
                 {w.weight}&nbsp;&times;&nbsp;{w.reps}
-                {count > 1 && <span className="pill">&times;{count}</span>}
+                {group.length > 1 && <span className="pill">&times;{group.length}</span>}
               </span>
             </li>
           );
