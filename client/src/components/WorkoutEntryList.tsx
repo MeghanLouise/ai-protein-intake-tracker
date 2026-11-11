@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import type { WorkoutSet } from '../types';
 import { groupSets } from '../workouts';
 
@@ -21,6 +22,27 @@ export default function WorkoutEntryList({
   onDelete,
   deleting,
 }: Props) {
+  // The delete action lives behind this menu (rather than a persistent button next to the
+  // repeat "+") so a stray tap near "+" can't remove a set by mistake.
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLSpanElement | null>(null);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    const closeIfOutside = (e: MouseEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setOpenMenuId(null);
+    };
+    const closeOnEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenMenuId(null);
+    };
+    document.addEventListener('mousedown', closeIfOutside);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeIfOutside);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [openMenuId]);
+
   return (
     <section className={'card entry-log' + (onDuplicate ? ' has-duplicate' : '')}>
       <h2>{title}</h2>
@@ -56,16 +78,34 @@ export default function WorkoutEntryList({
                   </button>
                 )}
                 {onDelete && (
-                  <button
-                    type="button"
-                    className="delete-btn"
-                    aria-label={`Delete ${s.exercise}: ${s.weight} × ${s.reps}`}
-                    title="Delete this set"
-                    disabled={deleting}
-                    onClick={() => onDelete(newest)}
-                  >
-                    &#215;
-                  </button>
+                  <span className="set-menu" ref={openMenuId === s.id ? menuRef : undefined}>
+                    <button
+                      type="button"
+                      className="set-menu-btn"
+                      aria-label={`More actions for ${s.exercise}: ${s.weight} × ${s.reps}`}
+                      aria-haspopup="menu"
+                      aria-expanded={openMenuId === s.id}
+                      onClick={() => setOpenMenuId(openMenuId === s.id ? null : s.id)}
+                    >
+                      &#8942;
+                    </button>
+                    {openMenuId === s.id && (
+                      <div className="set-menu-popover" role="menu">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="set-menu-delete"
+                          disabled={deleting}
+                          onClick={() => {
+                            setOpenMenuId(null);
+                            onDelete(newest);
+                          }}
+                        >
+                          Delete set
+                        </button>
+                      </div>
+                    )}
+                  </span>
                 )}
               </li>
             );

@@ -1143,6 +1143,12 @@ input[type='password'] {
   border-top: 1px solid var(--linen);
 }
 
+/* Grid items default to a min-width equal to their content's intrinsic width, which lets long
+   text push the row wider than its card instead of wrapping. Let every cell shrink below that. */
+.entry-log li > * {
+  min-width: 0;
+}
+
 /* The workout tracker's "today" list gets extra columns for the repeat/delete buttons. */
 .has-duplicate li {
   grid-template-columns: 3.25rem 1fr auto auto auto;
@@ -1163,6 +1169,7 @@ input[type='password'] {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+  overflow-wrap: break-word;
 }
 
 .workout-category {
@@ -1184,6 +1191,14 @@ input[type='password'] {
   gap: 0.4rem;
 }
 
+/* Unlike .grams, .figure can carry a long weight/reps string, so let it wrap instead of
+   overflowing the row when the content is too wide for its column. */
+.figure {
+  white-space: normal;
+  overflow-wrap: break-word;
+  flex-wrap: wrap;
+}
+
 /* Small badge showing how many times the same weight × reps was logged. */
 .pill {
   font-family: var(--font-sans);
@@ -1197,8 +1212,7 @@ input[type='password'] {
   white-space: nowrap;
 }
 
-.duplicate-btn,
-.delete-btn {
+.duplicate-btn {
   width: 1.75rem;
   height: 1.75rem;
   padding: 0;
@@ -1216,13 +1230,64 @@ input[type='password'] {
   border-color: var(--accent);
 }
 
-.delete-btn {
-  color: var(--error);
+/* The delete action sits behind a kebab menu, spatially and visually separate from the
+   circular "+" repeat button, so a mis-tap can't remove a set. */
+.set-menu {
+  position: relative;
+  flex-shrink: 0;
 }
 
-.delete-btn:hover:not(:disabled) {
+.set-menu-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--taupe);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+}
+
+.set-menu-btn:hover,
+.set-menu-btn[aria-expanded='true'] {
+  color: var(--espresso);
   background: var(--linen);
-  border-color: var(--error);
+  border-color: var(--sand);
+}
+
+.set-menu-popover {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 10;
+  min-width: 8.5rem;
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--sand);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 0.3rem;
+}
+
+.set-menu-delete {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--error);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius-sm) - 0.3rem);
+  padding: 0.55rem 0.7rem;
+}
+
+.set-menu-delete:hover:not(:disabled) {
+  background: var(--linen);
+}
+
+.set-menu-delete:disabled {
+  opacity: 0.6;
 }
 
 .empty {
