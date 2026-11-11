@@ -9,6 +9,7 @@ import {
 } from '../api';
 import type { TodayResponse, WorkoutSet } from '../types';
 import { usePreferences } from '../usePreferences';
+import DayDetail from './DayDetail';
 import DaySummary from './DaySummary';
 import DisplayToggles from './DisplayToggles';
 import EntryList from './EntryList';
@@ -17,7 +18,8 @@ import Spinner from './Spinner';
 import WorkoutEntryList from './WorkoutEntryList';
 
 // A date picker plus that day's totals and log. Reuses the same /api/today endpoint as the
-// tracker, which accepts any date, not only today.
+// tracker, which accepts any date, not only today. Clicking a logged meal or set opens a
+// day-detail view, scoped to the selected date, where that day's log can be edited.
 export default function CalendarView() {
   const [date, setDate] = useState(todayDate());
   const [day, setDay] = useState<TodayResponse | null>(null);
@@ -26,6 +28,8 @@ export default function CalendarView() {
   const [supplementsTotal, setSupplementsTotal] = useState(0);
   const [supplementsTaken, setSupplementsTaken] = useState(0);
   const [error, setError] = useState('');
+  const [editingDate, setEditingDate] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState(0);
   const { prefs, toggle } = usePreferences();
 
   // The supplement catalog doesn't depend on the selected date, so it's fetched once.
@@ -52,7 +56,7 @@ export default function CalendarView() {
     return () => {
       cancelled = true;
     };
-  }, [date]);
+  }, [date, refreshToken]);
 
   const heading = new Date(`${date}T00:00:00`).toLocaleDateString('en-US', {
     weekday: 'long',
@@ -62,6 +66,18 @@ export default function CalendarView() {
 
   const workoutCategories = workouts ? [...new Set(workouts.map((w) => w.category))] : [];
   const selectedSets = workouts?.filter((w) => w.category === selectedCategory) ?? [];
+
+  if (editingDate) {
+    return (
+      <DayDetail
+        date={editingDate}
+        onBack={() => {
+          setEditingDate(null);
+          setRefreshToken((c) => c + 1); // edits may have changed this day's totals
+        }}
+      />
+    );
+  }
 
   return (
     <div className="layout">
@@ -102,7 +118,11 @@ export default function CalendarView() {
           />
         )}
         {selectedCategory && (
-          <WorkoutEntryList sets={selectedSets} title={`${selectedCategory} · ${heading}`} />
+          <WorkoutEntryList
+            sets={selectedSets}
+            title={`${selectedCategory} · ${heading}`}
+            onEntryClick={() => setEditingDate(date)}
+          />
         )}
         {day && (
           <EntryList
@@ -110,6 +130,7 @@ export default function CalendarView() {
             title={heading}
             showCalories={prefs.showCalories}
             showFiber={prefs.showFiber}
+            onEntryClick={() => setEditingDate(date)}
           />
         )}
       </div>

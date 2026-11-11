@@ -5,9 +5,18 @@ interface Props {
   title?: string;
   showCalories?: boolean;
   showFiber?: boolean;
+  // When given, each row becomes clickable (e.g. the calendar's day-detail edit view) instead of
+  // being plain read-only history.
+  onEntryClick?: () => void;
 }
 
-export default function EntryList({ entries, title = "Today's log", showCalories, showFiber }: Props) {
+export default function EntryList({
+  entries,
+  title = "Today's log",
+  showCalories,
+  showFiber,
+  onEntryClick,
+}: Props) {
   return (
     <section className="card entry-log">
       <h2>{title}</h2>
@@ -16,7 +25,23 @@ export default function EntryList({ entries, title = "Today's log", showCalories
       ) : (
         <ul>
           {entries.map((e, i) => (
-            <li key={`${e.time}-${i}`}>
+            <li
+              key={e.id ?? `${e.time}-${i}`}
+              className={onEntryClick ? 'is-clickable' : undefined}
+              role={onEntryClick ? 'button' : undefined}
+              tabIndex={onEntryClick ? 0 : undefined}
+              onClick={onEntryClick}
+              onKeyDown={
+                onEntryClick
+                  ? (event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        onEntryClick();
+                      }
+                    }
+                  : undefined
+              }
+            >
               <span className="time">{e.time}</span>
               <span className="description">{e.description}</span>
               <span className="stats">

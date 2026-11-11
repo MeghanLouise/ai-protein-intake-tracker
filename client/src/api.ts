@@ -61,6 +61,18 @@ export const saveEntry = (description: string, protein_g: number, calories: numb
     time: localTime(),
   });
 
+// Edit a previously logged entry, e.g. from the calendar's day-detail view. Its date/time stay
+// as they were; only the meal's content changes.
+export const updateEntry = (
+  id: string,
+  description: string,
+  protein_g: number,
+  calories: number,
+  fiber_g: number,
+) => request<Entry>(`/api/entries/${id}`, 'PUT', { description, protein_g, calories, fiber_g });
+
+export const deleteEntry = (id: string) => request<{ ok: true }>(`/api/entries/${id}`, 'DELETE');
+
 export const saveGoal = (goal: number) => request<{ goal: number }>('/api/goal', 'PUT', { goal });
 
 export const getWorkouts = (date: string) => request<WorkoutsResponse>(`/api/workouts?date=${date}`);
@@ -74,6 +86,11 @@ export const saveWorkout = (category: string, exercise: string, weight: number, 
     date: localDate(),
     time: localTime(),
   });
+
+// Edit a previously logged set, e.g. from the calendar's day-detail view. Its date/time stay as
+// they were; only the exercise/weight/reps change.
+export const updateWorkout = (id: string, category: string, exercise: string, weight: number, reps: number) =>
+  request<WorkoutSet>(`/api/workouts/${id}`, 'PUT', { category, exercise, weight, reps });
 
 export const deleteWorkout = (id: string) => request<{ ok: true }>(`/api/workouts/${id}`, 'DELETE');
 

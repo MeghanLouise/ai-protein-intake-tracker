@@ -28,9 +28,10 @@ export function todayString() {
 export async function readEntries(uid, date) {
   const snap = await userDoc(uid).collection('entries').where('date', '==', date).get();
   return snap.docs
-    .map((doc) => doc.data())
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
     .sort((a, b) => a.createdAt - b.createdAt)
-    .map(({ date, time, description, protein_g, calories, fiber_g }) => ({
+    .map(({ id, date, time, description, protein_g, calories, fiber_g }) => ({
+      id,
       date,
       time,
       description,
@@ -49,8 +50,26 @@ export async function addEntry(uid, { description, protein_g, calories, fiber_g,
     calories: calories || 0,
     fiber_g: fiber_g || 0,
   };
-  await userDoc(uid).collection('entries').add({ ...entry, createdAt: Date.now() });
-  return entry;
+  const ref = await userDoc(uid).collection('entries').add({ ...entry, createdAt: Date.now() });
+  return { id: ref.id, ...entry };
+}
+
+// Update an edited entry's content, keeping its original date/time/createdAt (so it stays in place
+// in the day's log instead of jumping to the end).
+export async function updateEntry(uid, id, { description, protein_g, calories, fiber_g }) {
+  const fields = {
+    description: description.replaceAll('\n', ' '),
+    protein_g,
+    calories: calories || 0,
+    fiber_g: fiber_g || 0,
+  };
+  await userDoc(uid).collection('entries').doc(id).update(fields);
+  return fields;
+}
+
+// Delete one of this user's own logged entries, e.g. one added by mistake or no longer wanted.
+export async function deleteEntry(uid, id) {
+  await userDoc(uid).collection('entries').doc(id).delete();
 }
 
 // Workout sets for one calendar day, oldest first.
@@ -80,6 +99,13 @@ export async function addWorkout(uid, { category, exercise, weight, reps, date, 
 // reach another user's workouts even if an id were guessed.
 export async function deleteWorkout(uid, id) {
   await userDoc(uid).collection('workouts').doc(id).delete();
+}
+
+// Update an edited set's exercise/weight/reps, keeping its original date/time/createdAt.
+export async function updateWorkout(uid, id, { category, exercise, weight, reps }) {
+  const fields = { category, exercise: exercise.replaceAll('\n', ' '), weight, reps };
+  await userDoc(uid).collection('workouts').doc(id).update(fields);
+  return fields;
 }
 
 // How many sets were logged on each date in a range, for a heatmap/streak view. Only dates with

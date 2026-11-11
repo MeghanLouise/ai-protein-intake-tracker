@@ -6,6 +6,7 @@ import {
   addEntry,
   addSupplement,
   addWorkout,
+  deleteEntry,
   deleteWorkout,
   isActivated,
   markActivated,
@@ -20,6 +21,8 @@ import {
   removeSupplement,
   setSupplementCheck,
   todayString,
+  updateEntry,
+  updateWorkout,
   writeExerciseCatalog,
   writeGoal,
 } from './lib/storage.js';
@@ -88,33 +91,55 @@ app.post('/api/estimate', route(async (req, res) => {
   res.json(await estimateNutrition({ text, image }));
 }));
 
-// Save a (possibly user-edited) entry.
-app.post('/api/entries', route(async (req, res) => {
-  const { description, protein_g, calories, fiber_g, date, time } = req.body;
+// Shared by creating and editing an entry: description/protein_g/calories/fiber_g, or an error
+// message if any of them is out of range.
+function validateEntryFields({ description, protein_g, calories, fiber_g }) {
   const grams = Number(protein_g);
   const cal = Number(calories) || 0;
   const fiber = Number(fiber_g) || 0;
   if (typeof description !== 'string' || !description.trim() || description.length > 200) {
-    return res.status(400).json({ error: 'description is required (200 characters max)' });
+    return { error: 'description is required (200 characters max)' };
   }
   if (!Number.isFinite(grams) || grams < 0 || grams > 1000) {
-    return res.status(400).json({ error: 'protein_g must be a number between 0 and 1000' });
+    return { error: 'protein_g must be a number between 0 and 1000' };
   }
   if (cal < 0 || cal > 10000) {
-    return res.status(400).json({ error: 'calories must be a number between 0 and 10000' });
+    return { error: 'calories must be a number between 0 and 10000' };
   }
   if (fiber < 0 || fiber > 300) {
-    return res.status(400).json({ error: 'fiber_g must be a number between 0 and 300' });
+    return { error: 'fiber_g must be a number between 0 and 300' };
   }
+  return { fields: { description: description.trim(), protein_g: grams, calories: cal, fiber_g: fiber } };
+}
+
+const ID_RE = /^[A-Za-z0-9_-]{1,128}$/;
+
+// Save a (possibly user-edited) entry.
+app.post('/api/entries', route(async (req, res) => {
+  const { error, fields } = validateEntryFields(req.body);
+  if (error) return res.status(400).json({ error });
   const entry = {
-    description: description.trim(),
-    protein_g: grams,
-    calories: cal,
-    fiber_g: fiber,
-    date: pick(date, DATE_RE, todayString()),
-    time: pick(time, TIME_RE, new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })),
+    ...fields,
+    date: pick(req.body.date, DATE_RE, todayString()),
+    time: pick(req.body.time, TIME_RE, new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })),
   };
   res.status(201).json(await addEntry(req.uid, entry));
+}));
+
+// Edit an entry logged for a past (or current) day, e.g. from the calendar's day-detail view.
+// Keeps its original date/time; only the meal's content changes.
+app.put('/api/entries/:id', route(async (req, res) => {
+  if (!ID_RE.test(req.params.id)) return res.status(400).json({ error: 'Invalid entry id.' });
+  const { error, fields } = validateEntryFields(req.body);
+  if (error) return res.status(400).json({ error });
+  res.json(await updateEntry(req.uid, req.params.id, fields));
+}));
+
+// Remove a logged entry, e.g. one added by mistake. Scoped to the caller's own entries.
+app.delete('/api/entries/:id', route(async (req, res) => {
+  if (!ID_RE.test(req.params.id)) return res.status(400).json({ error: 'Invalid entry id.' });
+  await deleteEntry(req.uid, req.params.id);
+  res.json({ ok: true });
 }));
 
 // Today's (or any date's) logged workout sets.
@@ -123,37 +148,50 @@ app.get('/api/workouts', route(async (req, res) => {
   res.json({ date, workouts: await readWorkouts(req.uid, date) });
 }));
 
-// Save a workout set: an exercise from the user's own catalog (built-in or custom-added) with
-// weight and reps. Validated against their saved catalog, not just the fixed defaults, so
-// custom exercises they've added on the setup page can be logged too.
-app.post('/api/workouts', route(async (req, res) => {
-  const { category, exercise, weight, reps, date, time } = req.body;
-  const catalog = (await readExerciseCatalog(req.uid)) ?? EXERCISES;
+// Shared by creating and editing a set: category/exercise (checked against the user's own
+// catalog, built-in or custom-added) plus weight and reps, or an error message.
+async function validateWorkoutFields(uid, { category, exercise, weight, reps }) {
+  const catalog = (await readExerciseCatalog(uid)) ?? EXERCISES;
   if (typeof exercise !== 'string' || !catalog[category]?.includes(exercise)) {
-    return res.status(400).json({ error: 'Unrecognized category or exercise.' });
+    return { error: 'Unrecognized category or exercise.' };
   }
   const w = Number(weight);
   const r = Number(reps);
   if (!Number.isFinite(w) || w < 0 || w > 2000) {
-    return res.status(400).json({ error: 'weight must be a number between 0 and 2000' });
+    return { error: 'weight must be a number between 0 and 2000' };
   }
   if (!Number.isInteger(r) || r < 0 || r > 200) {
-    return res.status(400).json({ error: 'reps must be a whole number between 0 and 200' });
+    return { error: 'reps must be a whole number between 0 and 200' };
   }
+  return { fields: { category, exercise, weight: w, reps: r } };
+}
+
+// Save a workout set: an exercise from the user's own catalog (built-in or custom-added) with
+// weight and reps. Validated against their saved catalog, not just the fixed defaults, so
+// custom exercises they've added on the setup page can be logged too.
+app.post('/api/workouts', route(async (req, res) => {
+  const { error, fields } = await validateWorkoutFields(req.uid, req.body);
+  if (error) return res.status(400).json({ error });
   const set = {
-    category,
-    exercise,
-    weight: w,
-    reps: r,
-    date: pick(date, DATE_RE, todayString()),
-    time: pick(time, TIME_RE, new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })),
+    ...fields,
+    date: pick(req.body.date, DATE_RE, todayString()),
+    time: pick(req.body.time, TIME_RE, new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })),
   };
   res.status(201).json(await addWorkout(req.uid, set));
 }));
 
+// Edit a set logged for a past (or current) day, e.g. from the calendar's day-detail view.
+// Keeps its original date/time; only the exercise/weight/reps change.
+app.put('/api/workouts/:id', route(async (req, res) => {
+  if (!ID_RE.test(req.params.id)) return res.status(400).json({ error: 'Invalid set id.' });
+  const { error, fields } = await validateWorkoutFields(req.uid, req.body);
+  if (error) return res.status(400).json({ error });
+  res.json(await updateWorkout(req.uid, req.params.id, fields));
+}));
+
 // Remove a logged set, e.g. one added by mistake. Scoped to the caller's own workouts.
 app.delete('/api/workouts/:id', route(async (req, res) => {
-  if (!/^[A-Za-z0-9_-]{1,128}$/.test(req.params.id)) {
+  if (!ID_RE.test(req.params.id)) {
     return res.status(400).json({ error: 'Invalid set id.' });
   }
   await deleteWorkout(req.uid, req.params.id);
