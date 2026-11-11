@@ -12,6 +12,9 @@ interface Props {
   // When given, each set gets a button to remove it (e.g. one added by mistake).
   onDelete?: (set: WorkoutSet) => void;
   deleting?: boolean;
+  // When given, each row becomes clickable (e.g. the calendar's day-detail edit view) instead of
+  // being plain read-only history.
+  onEntryClick?: () => void;
 }
 
 export default function WorkoutEntryList({
@@ -21,6 +24,7 @@ export default function WorkoutEntryList({
   duplicating,
   onDelete,
   deleting,
+  onEntryClick,
 }: Props) {
   // The delete action lives behind this menu (rather than a persistent button next to the
   // repeat "+") so a stray tap near "+" can't remove a set by mistake.
@@ -55,7 +59,23 @@ export default function WorkoutEntryList({
             // Deleting a repeated row removes just the newest one logged, not the whole group.
             const newest = group[group.length - 1];
             return (
-              <li key={s.id}>
+              <li
+                key={s.id}
+                className={onEntryClick ? 'is-clickable' : undefined}
+                role={onEntryClick ? 'button' : undefined}
+                tabIndex={onEntryClick ? 0 : undefined}
+                onClick={onEntryClick}
+                onKeyDown={
+                  onEntryClick
+                    ? (event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          onEntryClick();
+                        }
+                      }
+                    : undefined
+                }
+              >
                 <span className="time">{s.time}</span>
                 <span className="description">
                   {s.exercise}
@@ -72,7 +92,10 @@ export default function WorkoutEntryList({
                     aria-label={`Repeat ${s.exercise}: ${s.weight} × ${s.reps}`}
                     title="Repeat this set"
                     disabled={duplicating}
-                    onClick={() => onDuplicate(s)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDuplicate(s);
+                    }}
                   >
                     &#43;
                   </button>

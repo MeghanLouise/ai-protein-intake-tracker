@@ -1228,25 +1228,44 @@ input[type='password'] {
   grid-template-columns: 3.25rem 1fr auto auto auto;
 }
 
+/* The day-detail view's lists get extra columns for the edit/delete buttons. */
+.has-edit li {
+  grid-template-columns: 3.25rem 1fr auto auto auto;
+}
+
 .entry-log li:first-child {
   border-top: none;
   padding-top: 0;
 }
 
+/* Rows on the calendar's history lists open the day-detail edit view on click. */
+.entry-log li.is-clickable,
 .entry-log li.clickable {
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: background 0.15s;
 }
 
+.entry-log li.is-clickable:hover,
 .entry-log li.clickable:hover,
 .entry-log li.clickable:focus-visible {
   background: var(--linen);
   outline: none;
 }
 
+/* A row being edited in the day-detail view: its form fills the row instead of following the
+   list's column grid (each row is its own grid, so overriding display here is enough). Needs to
+   out-specificity ".entry-log li"'s own display:grid. */
+.entry-log li.entry-edit-row,
 .entry-log li.editing {
   display: block;
+}
+
+.entry-edit-row form {
+  padding: 0.5rem 0 0.25rem;
+}
+
+.entry-log li.editing {
   padding: 0.85rem 0;
 }
 
@@ -1303,7 +1322,9 @@ input[type='password'] {
   white-space: nowrap;
 }
 
-.duplicate-btn {
+.duplicate-btn,
+.delete-btn,
+.edit-btn {
   width: 1.75rem;
   height: 1.75rem;
   padding: 0;
@@ -1316,7 +1337,8 @@ input[type='password'] {
   flex-shrink: 0;
 }
 
-.duplicate-btn:hover:not(:disabled) {
+.duplicate-btn:hover:not(:disabled),
+.edit-btn:hover:not(:disabled) {
   background: var(--linen);
   border-color: var(--accent);
 }
@@ -1379,6 +1401,15 @@ input[type='password'] {
 
 .set-menu-delete:disabled {
   opacity: 0.6;
+}
+
+/* Day-detail view (reached by clicking a meal or set on the calendar) */
+.back-link {
+  margin-bottom: 0.75rem;
+}
+
+.day-detail-header h2 {
+  margin-bottom: 0;
 }
 
 .empty {

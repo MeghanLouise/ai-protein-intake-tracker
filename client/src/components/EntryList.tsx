@@ -7,11 +7,21 @@ interface Props {
   title?: string;
   showCalories?: boolean;
   showFiber?: boolean;
+  // When given, each row becomes clickable (e.g. the calendar's day-detail edit view) instead of
+  // being plain read-only history. Ignored when onUpdate is also given.
+  onEntryClick?: () => void;
   // When given, entries become clickable to open an edit form in place of that row.
   onUpdate?: (entry: Entry, description: string, grams: number, calories: number, fiber: number) => Promise<void>;
 }
 
-export default function EntryList({ entries, title = "Today's log", showCalories, showFiber, onUpdate }: Props) {
+export default function EntryList({
+  entries,
+  title = "Today's log",
+  showCalories,
+  showFiber,
+  onEntryClick,
+  onUpdate,
+}: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -52,20 +62,21 @@ export default function EntryList({ entries, title = "Today's log", showCalories
                 </li>
               );
             }
-            const clickable = Boolean(onUpdate);
+            const onClick = onUpdate ? () => setEditingId(key) : onEntryClick;
+            const clickable = Boolean(onClick);
             return (
               <li
                 key={key}
                 className={clickable ? 'clickable' : undefined}
-                onClick={clickable ? () => setEditingId(key) : undefined}
+                onClick={onClick}
                 role={clickable ? 'button' : undefined}
                 tabIndex={clickable ? 0 : undefined}
                 onKeyDown={
-                  clickable
+                  onClick
                     ? (event) => {
                         if (event.key === 'Enter' || event.key === ' ') {
                           event.preventDefault();
-                          setEditingId(key);
+                          onClick();
                         }
                       }
                     : undefined

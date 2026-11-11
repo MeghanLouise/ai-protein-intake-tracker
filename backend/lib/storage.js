@@ -55,9 +55,10 @@ export async function addEntry(uid, { description, protein_g, calories, fiber_g,
   return { id: ref.id, ...entry };
 }
 
-// Update an existing entry (e.g. the user correcting a logged meal). Scoped under the caller's
-// own uid, so there's no way to reach another user's entries even if an id were guessed. Only the
-// editable fields change; date/time stay as originally logged.
+// Update an existing entry (e.g. the user correcting a logged meal, or editing it from the
+// calendar's day-detail view). Scoped under the caller's own uid, so there's no way to reach
+// another user's entries even if an id were guessed. Only the editable fields change; date/time
+// stay as originally logged.
 export async function updateEntry(uid, id, { description, protein_g, calories, fiber_g }) {
   const doc = userDoc(uid).collection('entries').doc(id);
   const edits = {
@@ -69,6 +70,11 @@ export async function updateEntry(uid, id, { description, protein_g, calories, f
   await doc.update(edits);
   const { date, time } = (await doc.get()).data();
   return { id, date, time, ...edits };
+}
+
+// Delete one of this user's own logged entries, e.g. one added by mistake or no longer wanted.
+export async function deleteEntry(uid, id) {
+  await userDoc(uid).collection('entries').doc(id).delete();
 }
 
 // Saved meal configurations, newest first, optionally filtered to one tag.
@@ -130,6 +136,13 @@ export async function addWorkout(uid, { category, exercise, weight, reps, date, 
 // reach another user's workouts even if an id were guessed.
 export async function deleteWorkout(uid, id) {
   await userDoc(uid).collection('workouts').doc(id).delete();
+}
+
+// Update an edited set's exercise/weight/reps, keeping its original date/time/createdAt.
+export async function updateWorkout(uid, id, { category, exercise, weight, reps }) {
+  const fields = { category, exercise: exercise.replaceAll('\n', ' '), weight, reps };
+  await userDoc(uid).collection('workouts').doc(id).update(fields);
+  return fields;
 }
 
 // Every set this user has ever logged, oldest first. Used by the progress chart (to plot weight
