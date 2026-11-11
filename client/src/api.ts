@@ -6,6 +6,9 @@ import type {
   ExerciseCatalogResponse,
   ImagePayload,
   LastWorkoutResponse,
+  MealTag,
+  SavedMeal,
+  SavedMealsResponse,
   SupplementChecksResponse,
   SupplementsResponse,
   TodayResponse,
@@ -62,6 +65,19 @@ export const saveEntry = (description: string, protein_g: number, calories: numb
   });
 
 export const saveGoal = (goal: number) => request<{ goal: number }>('/api/goal', 'PUT', { goal });
+
+// Saved meal configurations, so a past meal can be re-added without retyping it.
+export const getSavedMeals = (tag?: MealTag) =>
+  request<SavedMealsResponse>(`/api/saved-meals${tag ? `?tag=${encodeURIComponent(tag)}` : ''}`);
+
+export const saveMealConfig = (
+  name: string,
+  tag: MealTag,
+  description: string,
+  protein_g: number,
+  calories: number,
+  fiber_g: number,
+) => request<SavedMeal>('/api/saved-meals', 'POST', { name, tag, description, protein_g, calories, fiber_g });
 
 export const getWorkouts = (date: string) => request<WorkoutsResponse>(`/api/workouts?date=${date}`);
 

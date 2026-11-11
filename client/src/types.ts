@@ -31,6 +31,24 @@ export interface ImagePayload {
   data: string;
 }
 
+// Fixed set of labels a saved meal can be tagged with.
+export const MEAL_TAGS = ['Breakfast', 'Lunch', 'Dinner', 'Snack'] as const;
+export type MealTag = (typeof MEAL_TAGS)[number];
+
+export interface SavedMeal {
+  id: string;
+  name: string;
+  tag: MealTag;
+  description: string;
+  protein_g: number;
+  calories: number;
+  fiber_g: number;
+}
+
+export interface SavedMealsResponse {
+  savedMeals: SavedMeal[];
+}
+
 export interface WorkoutSet {
   id: string;
   date: string;
