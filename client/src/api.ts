@@ -61,6 +61,14 @@ export const saveEntry = (description: string, protein_g: number, calories: numb
     time: localTime(),
   });
 
+export const updateEntry = (
+  id: string,
+  description: string,
+  protein_g: number,
+  calories: number,
+  fiber_g: number,
+) => request<Entry>(`/api/entries/${id}`, 'PUT', { description, protein_g, calories, fiber_g });
+
 export const saveGoal = (goal: number) => request<{ goal: number }>('/api/goal', 'PUT', { goal });
 
 export const getWorkouts = (date: string) => request<WorkoutsResponse>(`/api/workouts?date=${date}`);

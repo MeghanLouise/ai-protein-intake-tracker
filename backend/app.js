@@ -20,6 +20,7 @@ import {
   removeSupplement,
   setSupplementCheck,
   todayString,
+  updateEntry,
   writeExerciseCatalog,
   writeGoal,
 } from './lib/storage.js';
@@ -88,33 +89,49 @@ app.post('/api/estimate', route(async (req, res) => {
   res.json(await estimateNutrition({ text, image }));
 }));
 
-// Save a (possibly user-edited) entry.
-app.post('/api/entries', route(async (req, res) => {
-  const { description, protein_g, calories, fiber_g, date, time } = req.body;
+// Shared validation for the meal fields a user can set, whether logging a new entry or editing
+// an existing one. Returns { error } or { description, protein_g, calories, fiber_g }.
+function validateEntryFields({ description, protein_g, calories, fiber_g }) {
   const grams = Number(protein_g);
   const cal = Number(calories) || 0;
   const fiber = Number(fiber_g) || 0;
   if (typeof description !== 'string' || !description.trim() || description.length > 200) {
-    return res.status(400).json({ error: 'description is required (200 characters max)' });
+    return { error: 'description is required (200 characters max)' };
   }
   if (!Number.isFinite(grams) || grams < 0 || grams > 1000) {
-    return res.status(400).json({ error: 'protein_g must be a number between 0 and 1000' });
+    return { error: 'protein_g must be a number between 0 and 1000' };
   }
   if (cal < 0 || cal > 10000) {
-    return res.status(400).json({ error: 'calories must be a number between 0 and 10000' });
+    return { error: 'calories must be a number between 0 and 10000' };
   }
   if (fiber < 0 || fiber > 300) {
-    return res.status(400).json({ error: 'fiber_g must be a number between 0 and 300' });
+    return { error: 'fiber_g must be a number between 0 and 300' };
   }
+  return { description: description.trim(), protein_g: grams, calories: cal, fiber_g: fiber };
+}
+
+// Save a (possibly user-edited) entry.
+app.post('/api/entries', route(async (req, res) => {
+  const fields = validateEntryFields(req.body);
+  if (fields.error) return res.status(400).json({ error: fields.error });
+  const { date, time } = req.body;
   const entry = {
-    description: description.trim(),
-    protein_g: grams,
-    calories: cal,
-    fiber_g: fiber,
+    ...fields,
     date: pick(date, DATE_RE, todayString()),
     time: pick(time, TIME_RE, new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })),
   };
   res.status(201).json(await addEntry(req.uid, entry));
+}));
+
+// Update a logged entry, e.g. correcting the protein/calories/fiber after the fact. Scoped to
+// the caller's own entries.
+app.put('/api/entries/:id', route(async (req, res) => {
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(req.params.id)) {
+    return res.status(400).json({ error: 'Invalid entry id.' });
+  }
+  const fields = validateEntryFields(req.body);
+  if (fields.error) return res.status(400).json({ error: fields.error });
+  res.json(await updateEntry(req.uid, req.params.id, fields));
 }));
 
 // Today's (or any date's) logged workout sets.

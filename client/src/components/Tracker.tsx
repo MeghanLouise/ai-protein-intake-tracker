@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { errorMessage, getToday, saveGoal } from '../api';
-import type { TodayResponse } from '../types';
+import { errorMessage, getToday, saveGoal, updateEntry } from '../api';
+import type { Entry, TodayResponse } from '../types';
 import { usePreferences } from '../usePreferences';
 import AddMealForm from './AddMealForm';
 import EntryList from './EntryList';
@@ -35,6 +35,11 @@ export default function Tracker() {
     }
   };
 
+  const editEntry = async (entry: Entry, description: string, grams: number, calories: number, fiber: number) => {
+    await updateEntry(entry.id, description, grams, calories, fiber);
+    await refresh();
+  };
+
   return (
     <>
       {error && <p className="error" role="alert">{error}</p>}
@@ -57,6 +62,7 @@ export default function Tracker() {
               entries={today.entries}
               showCalories={prefs.showCalories}
               showFiber={prefs.showFiber}
+              onUpdate={editEntry}
             />
           </div>
         </div>
