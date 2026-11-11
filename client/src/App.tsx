@@ -5,6 +5,7 @@ import BottomNav from './components/BottomNav';
 import CalendarView from './components/CalendarView';
 import InviteGate from './components/InviteGate';
 import MenuBar from './components/MenuBar';
+import ProgressPage from './components/ProgressPage';
 import SignIn from './components/SignIn';
 import Spinner from './components/Spinner';
 import SupplementsPage from './components/SupplementsPage';
@@ -70,6 +71,8 @@ export default function App() {
         <CalendarView key={user.uid} />
       ) : path === '/workout' ? (
         <WorkoutTracker key={user.uid} />
+      ) : path === '/progress' ? (
+        <ProgressPage key={user.uid} />
       ) : path === '/workout-setup' ? (
         <WorkoutSetup key={user.uid} />
       ) : path === '/supplements' ? (
@@ -85,7 +88,7 @@ export default function App() {
   const pageKey =
     path === '/calendar'
       ? 'calendar'
-      : path === '/workout' || path === '/workout-setup'
+      : path === '/workout' || path === '/workout-setup' || path === '/progress'
         ? 'workout'
         : path === '/supplements'
           ? 'supplements'

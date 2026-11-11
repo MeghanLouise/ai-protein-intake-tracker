@@ -994,6 +994,80 @@ button.link:hover:not(:disabled) {
   border-radius: var(--radius-sm);
 }
 
+/* Save-for-later fields in ConfirmForm */
+.save-meal-toggle {
+  margin-top: 0.25rem;
+}
+
+.save-meal-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Saved meals (picker shown while composing a new entry) */
+.saved-meals {
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--linen);
+}
+
+.saved-meal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0.9rem;
+}
+
+.saved-meal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.saved-meal-btn {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--espresso);
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  text-align: left;
+}
+
+.saved-meal-btn:hover:not(:disabled) {
+  background: var(--sand);
+}
+
+.saved-meal-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-meal-tag {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+.saved-meal-figure {
+  font-size: 0.8rem;
+  color: var(--taupe);
+  white-space: nowrap;
+}
+
 /* "Last Push day" reference box in AddSetForm */
 .last-session {
   margin-bottom: 1rem;
@@ -1143,6 +1217,12 @@ input[type='password'] {
   border-top: 1px solid var(--linen);
 }
 
+/* Grid items default to a min-width equal to their content's intrinsic width, which lets long
+   text push the row wider than its card instead of wrapping. Let every cell shrink below that. */
+.entry-log li > * {
+  min-width: 0;
+}
+
 /* The workout tracker's "today" list gets extra columns for the repeat/delete buttons. */
 .has-duplicate li {
   grid-template-columns: 3.25rem 1fr auto auto auto;
@@ -1159,25 +1239,34 @@ input[type='password'] {
 }
 
 /* Rows on the calendar's history lists open the day-detail edit view on click. */
-.entry-log li.is-clickable {
+.entry-log li.is-clickable,
+.entry-log li.clickable {
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: background 0.15s;
 }
 
-.entry-log li.is-clickable:hover {
+.entry-log li.is-clickable:hover,
+.entry-log li.clickable:hover,
+.entry-log li.clickable:focus-visible {
   background: var(--linen);
+  outline: none;
 }
 
 /* A row being edited in the day-detail view: its form fills the row instead of following the
    list's column grid (each row is its own grid, so overriding display here is enough). Needs to
    out-specificity ".entry-log li"'s own display:grid. */
-.entry-log li.entry-edit-row {
+.entry-log li.entry-edit-row,
+.entry-log li.editing {
   display: block;
 }
 
 .entry-edit-row form {
   padding: 0.5rem 0 0.25rem;
+}
+
+.entry-log li.editing {
+  padding: 0.85rem 0;
 }
 
 .time {
@@ -1190,6 +1279,7 @@ input[type='password'] {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+  overflow-wrap: break-word;
 }
 
 .workout-category {
@@ -1209,6 +1299,14 @@ input[type='password'] {
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
+}
+
+/* Unlike .grams, .figure can carry a long weight/reps string, so let it wrap instead of
+   overflowing the row when the content is too wide for its column. */
+.figure {
+  white-space: normal;
+  overflow-wrap: break-word;
+  flex-wrap: wrap;
 }
 
 /* Small badge showing how many times the same weight × reps was logged. */
@@ -1245,13 +1343,64 @@ input[type='password'] {
   border-color: var(--accent);
 }
 
-.delete-btn {
-  color: var(--error);
+/* The delete action sits behind a kebab menu, spatially and visually separate from the
+   circular "+" repeat button, so a mis-tap can't remove a set. */
+.set-menu {
+  position: relative;
+  flex-shrink: 0;
 }
 
-.delete-btn:hover:not(:disabled) {
+.set-menu-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--taupe);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+}
+
+.set-menu-btn:hover,
+.set-menu-btn[aria-expanded='true'] {
+  color: var(--espresso);
   background: var(--linen);
-  border-color: var(--error);
+  border-color: var(--sand);
+}
+
+.set-menu-popover {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 10;
+  min-width: 8.5rem;
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--sand);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 0.3rem;
+}
+
+.set-menu-delete {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--error);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius-sm) - 0.3rem);
+  padding: 0.55rem 0.7rem;
+}
+
+.set-menu-delete:hover:not(:disabled) {
+  background: var(--linen);
+}
+
+.set-menu-delete:disabled {
+  opacity: 0.6;
 }
 
 /* Day-detail view (reached by clicking a meal or set on the calendar) */
@@ -1435,6 +1584,74 @@ input[type='password'] {
 
 .bottom-nav-btn.is-active:hover:not(:disabled) {
   background: var(--accent-dark);
+}
+
+/* Progress page: weight-over-time line chart + AI insights card */
+.weight-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.weight-chart-axis {
+  stroke: var(--linen);
+  stroke-width: 1;
+}
+
+.weight-chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.weight-chart-dot {
+  fill: var(--accent);
+}
+
+.weight-chart-label {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  fill: var(--taupe);
+}
+
+.weight-chart-label-y {
+  font-weight: 700;
+  fill: var(--mocha-dark);
+}
+
+.insight-card button {
+  margin-bottom: 1rem;
+}
+
+.insight-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.insight-list div {
+  padding: 0.9rem 1rem;
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+}
+
+.insight-list dt {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+.insight-list dd {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--mocha-dark);
 }
 
 @media (prefers-reduced-motion: reduce) {

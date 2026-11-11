@@ -32,6 +32,24 @@ export interface ImagePayload {
   data: string;
 }
 
+// Fixed set of labels a saved meal can be tagged with.
+export const MEAL_TAGS = ['Breakfast', 'Lunch', 'Dinner', 'Snack'] as const;
+export type MealTag = (typeof MEAL_TAGS)[number];
+
+export interface SavedMeal {
+  id: string;
+  name: string;
+  tag: MealTag;
+  description: string;
+  protein_g: number;
+  calories: number;
+  fiber_g: number;
+}
+
+export interface SavedMealsResponse {
+  savedMeals: SavedMeal[];
+}
+
 export interface WorkoutSet {
   id: string;
   date: string;
@@ -59,6 +77,18 @@ export interface WorkoutActivityResponse {
   from: string;
   to: string;
   counts: Record<string, number>;
+}
+
+// Every set the user has ever logged, for the progress chart.
+export interface WorkoutHistoryResponse {
+  workouts: WorkoutSet[];
+}
+
+// Short AI-generated feedback on training trends, from the progress page.
+export interface WorkoutInsight {
+  improving: string;
+  focus: string;
+  missing: string;
 }
 
 // One exercise list per day type, e.g. { 'Push day': ['Bench Press', ...], ... }.

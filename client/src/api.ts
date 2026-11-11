@@ -6,10 +6,15 @@ import type {
   ExerciseCatalogResponse,
   ImagePayload,
   LastWorkoutResponse,
+  MealTag,
+  SavedMeal,
+  SavedMealsResponse,
   SupplementChecksResponse,
   SupplementsResponse,
   TodayResponse,
   WorkoutActivityResponse,
+  WorkoutHistoryResponse,
+  WorkoutInsight,
   WorkoutSet,
   WorkoutsResponse,
 } from './types';
@@ -75,6 +80,19 @@ export const deleteEntry = (id: string) => request<{ ok: true }>(`/api/entries/$
 
 export const saveGoal = (goal: number) => request<{ goal: number }>('/api/goal', 'PUT', { goal });
 
+// Saved meal configurations, so a past meal can be re-added without retyping it.
+export const getSavedMeals = (tag?: MealTag) =>
+  request<SavedMealsResponse>(`/api/saved-meals${tag ? `?tag=${encodeURIComponent(tag)}` : ''}`);
+
+export const saveMealConfig = (
+  name: string,
+  tag: MealTag,
+  description: string,
+  protein_g: number,
+  calories: number,
+  fiber_g: number,
+) => request<SavedMeal>('/api/saved-meals', 'POST', { name, tag, description, protein_g, calories, fiber_g });
+
 export const getWorkouts = (date: string) => request<WorkoutsResponse>(`/api/workouts?date=${date}`);
 
 export const saveWorkout = (category: string, exercise: string, weight: number, reps: number) =>
@@ -102,6 +120,12 @@ export const getLastWorkout = (category: string) =>
 
 export const getWorkoutActivity = (from: string, to: string) =>
   request<WorkoutActivityResponse>(`/api/workouts/activity?from=${from}&to=${to}`);
+
+// Every set ever logged, for the progress chart.
+export const getWorkoutHistory = () => request<WorkoutHistoryResponse>('/api/workouts/history');
+
+export const getWorkoutInsight = (exercise?: string) =>
+  request<WorkoutInsight>('/api/workouts/insights', 'POST', { exercise });
 
 export const getExerciseCatalog = () => request<ExerciseCatalogResponse>('/api/exercise-catalog');
 
