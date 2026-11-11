@@ -29,9 +29,10 @@ export function todayString() {
 export async function readEntries(uid, date) {
   const snap = await userDoc(uid).collection('entries').where('date', '==', date).get();
   return snap.docs
-    .map((doc) => doc.data())
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
     .sort((a, b) => a.createdAt - b.createdAt)
-    .map(({ date, time, description, protein_g, calories, fiber_g }) => ({
+    .map(({ id, date, time, description, protein_g, calories, fiber_g }) => ({
+      id,
       date,
       time,
       description,
@@ -50,8 +51,24 @@ export async function addEntry(uid, { description, protein_g, calories, fiber_g,
     calories: calories || 0,
     fiber_g: fiber_g || 0,
   };
-  await userDoc(uid).collection('entries').add({ ...entry, createdAt: Date.now() });
-  return entry;
+  const ref = await userDoc(uid).collection('entries').add({ ...entry, createdAt: Date.now() });
+  return { id: ref.id, ...entry };
+}
+
+// Update an existing entry (e.g. the user correcting a logged meal). Scoped under the caller's
+// own uid, so there's no way to reach another user's entries even if an id were guessed. Only the
+// editable fields change; date/time stay as originally logged.
+export async function updateEntry(uid, id, { description, protein_g, calories, fiber_g }) {
+  const doc = userDoc(uid).collection('entries').doc(id);
+  const edits = {
+    description: description.replaceAll('\n', ' '),
+    protein_g,
+    calories: calories || 0,
+    fiber_g: fiber_g || 0,
+  };
+  await doc.update(edits);
+  const { date, time } = (await doc.get()).data();
+  return { id, date, time, ...edits };
 }
 
 // Saved meal configurations, newest first, optionally filtered to one tag.

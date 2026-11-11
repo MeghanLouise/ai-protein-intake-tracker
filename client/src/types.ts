@@ -1,6 +1,7 @@
 // Shapes of the data exchanged with the Express API.
 
 export interface Entry {
+  id: string;
   date: string;
   time: string;
   description: string;

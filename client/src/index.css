@@ -1233,6 +1233,23 @@ input[type='password'] {
   padding-top: 0;
 }
 
+.entry-log li.clickable {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+
+.entry-log li.clickable:hover,
+.entry-log li.clickable:focus-visible {
+  background: var(--linen);
+  outline: none;
+}
+
+.entry-log li.editing {
+  display: block;
+  padding: 0.85rem 0;
+}
+
 .time {
   font-size: 0.8rem;
   color: var(--taupe);
