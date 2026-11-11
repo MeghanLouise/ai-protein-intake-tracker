@@ -10,6 +10,8 @@ import type {
   SupplementsResponse,
   TodayResponse,
   WorkoutActivityResponse,
+  WorkoutHistoryResponse,
+  WorkoutInsight,
   WorkoutSet,
   WorkoutsResponse,
 } from './types';
@@ -85,6 +87,12 @@ export const getLastWorkout = (category: string) =>
 
 export const getWorkoutActivity = (from: string, to: string) =>
   request<WorkoutActivityResponse>(`/api/workouts/activity?from=${from}&to=${to}`);
+
+// Every set ever logged, for the progress chart.
+export const getWorkoutHistory = () => request<WorkoutHistoryResponse>('/api/workouts/history');
+
+export const getWorkoutInsight = (exercise?: string) =>
+  request<WorkoutInsight>('/api/workouts/insights', 'POST', { exercise });
 
 export const getExerciseCatalog = () => request<ExerciseCatalogResponse>('/api/exercise-catalog');
 

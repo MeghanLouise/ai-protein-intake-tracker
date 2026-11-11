@@ -82,6 +82,24 @@ export async function deleteWorkout(uid, id) {
   await userDoc(uid).collection('workouts').doc(id).delete();
 }
 
+// Every set this user has ever logged, oldest first. Used by the progress chart (to plot weight
+// over time per exercise) and the AI insights endpoint (to summarize trends).
+export async function readAllWorkouts(uid) {
+  const snap = await userDoc(uid).collection('workouts').get();
+  return snap.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .sort((a, b) => a.createdAt - b.createdAt)
+    .map(({ id, date, time, category, exercise, weight, reps }) => ({
+      id,
+      date,
+      time,
+      category,
+      exercise,
+      weight,
+      reps,
+    }));
+}
+
 // How many sets were logged on each date in a range, for a heatmap/streak view. Only dates with
 // at least one set appear in the result. Date strings compare correctly as plain text.
 export async function readWorkoutActivity(uid, fromDate, toDate) {

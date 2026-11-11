@@ -1,5 +1,5 @@
 import express from 'express';
-import { estimateNutrition } from './lib/ai.js';
+import { estimateNutrition, generateWorkoutInsight } from './lib/ai.js';
 import { requireAuth } from './lib/auth.js';
 import { isValidInviteCode, requireInvite } from './lib/invites.js';
 import {
@@ -9,6 +9,7 @@ import {
   deleteWorkout,
   isActivated,
   markActivated,
+  readAllWorkouts,
   readEntries,
   readExerciseCatalog,
   readGoal,
@@ -158,6 +159,29 @@ app.delete('/api/workouts/:id', route(async (req, res) => {
   }
   await deleteWorkout(req.uid, req.params.id);
   res.json({ ok: true });
+}));
+
+// Every set this user has ever logged, for the progress chart (plots weight over time per
+// exercise, picked client-side from this one list rather than one request per exercise).
+app.get('/api/workouts/history', route(async (req, res) => {
+  res.json({ workouts: await readAllWorkouts(req.uid) });
+}));
+
+// AI feedback on this user's training trends, generated from an anonymized slice of their own
+// workout history (exercise/weight/reps/date only — no uid, name or other identifying info).
+app.post('/api/workouts/insights', route(async (req, res) => {
+  const exercise = typeof req.body?.exercise === 'string' ? req.body.exercise : undefined;
+  const history = (await readAllWorkouts(req.uid)).map(({ category, exercise, weight, reps, date }) => ({
+    category,
+    exercise,
+    weight,
+    reps,
+    date,
+  }));
+  if (history.length === 0) {
+    return res.status(400).json({ error: 'Log some workouts first.' });
+  }
+  res.json(await generateWorkoutInsight({ history, exercise }));
 }));
 
 // How many sets were logged on each day in a range, e.g. for a streak/heatmap view. The browser

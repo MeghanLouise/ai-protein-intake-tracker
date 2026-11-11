@@ -60,6 +60,18 @@ export interface WorkoutActivityResponse {
   counts: Record<string, number>;
 }
 
+// Every set the user has ever logged, for the progress chart.
+export interface WorkoutHistoryResponse {
+  workouts: WorkoutSet[];
+}
+
+// Short AI-generated feedback on training trends, from the progress page.
+export interface WorkoutInsight {
+  improving: string;
+  focus: string;
+  missing: string;
+}
+
 // One exercise list per day type, e.g. { 'Push day': ['Bench Press', ...], ... }.
 export type ExerciseCatalog = Record<string, string[]>;
 
