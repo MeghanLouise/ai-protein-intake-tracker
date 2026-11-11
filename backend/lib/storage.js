@@ -3,6 +3,7 @@
 //   users/{uid}/entries/{id}           { date, time, description, protein_g, calories, fiber_g, createdAt }
 //   users/{uid}/workouts/{id}          { date, time, category, exercise, weight, reps, createdAt }
 //   users/{uid}/supplementDays/{date}  { date, taken: string[] }
+//   users/{uid}/savedMeals/{id}        { name, tag, description, protein_g, calories, fiber_g, createdAt }
 // Only this server touches Firestore (through the Admin SDK), so client access can stay locked.
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { firebaseApp, hasServiceAccount } from './firebase.js';
@@ -51,6 +52,38 @@ export async function addEntry(uid, { description, protein_g, calories, fiber_g,
   };
   await userDoc(uid).collection('entries').add({ ...entry, createdAt: Date.now() });
   return entry;
+}
+
+// Saved meal configurations, newest first, optionally filtered to one tag.
+export async function readSavedMeals(uid, tag) {
+  let query = userDoc(uid).collection('savedMeals');
+  if (tag) query = query.where('tag', '==', tag);
+  const snap = await query.get();
+  return snap.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .map(({ id, name, tag, description, protein_g, calories, fiber_g }) => ({
+      id,
+      name,
+      tag,
+      description,
+      protein_g,
+      calories: calories || 0,
+      fiber_g: fiber_g || 0,
+    }));
+}
+
+export async function addSavedMeal(uid, { name, tag, description, protein_g, calories, fiber_g }) {
+  const meal = {
+    name,
+    tag,
+    description,
+    protein_g,
+    calories: calories || 0,
+    fiber_g: fiber_g || 0,
+  };
+  const ref = await userDoc(uid).collection('savedMeals').add({ ...meal, createdAt: Date.now() });
+  return { id: ref.id, ...meal };
 }
 
 // Workout sets for one calendar day, oldest first.
