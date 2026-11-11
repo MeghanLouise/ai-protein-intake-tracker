@@ -8,7 +8,9 @@ interface Props {
   onUse: (meal: SavedMeal) => void;
 }
 
-// Browse saved meal configurations by tag and reuse one instead of describing it again.
+// Browse saved meal configurations by tag and reuse one instead of describing it again. All of
+// them are fetched once; the tag chips just filter what's already in hand, so switching tags
+// doesn't re-hit the server.
 export default function SavedMealsPicker({ refreshKey, onUse }: Props) {
   const [tag, setTag] = useState<MealTag | null>(null);
   const [meals, setMeals] = useState<SavedMeal[]>([]);
@@ -16,7 +18,7 @@ export default function SavedMealsPicker({ refreshKey, onUse }: Props) {
 
   useEffect(() => {
     let active = true;
-    getSavedMeals(tag ?? undefined)
+    getSavedMeals()
       .then((res) => {
         if (active) setMeals(res.savedMeals);
       })
@@ -26,7 +28,9 @@ export default function SavedMealsPicker({ refreshKey, onUse }: Props) {
     return () => {
       active = false;
     };
-  }, [tag, refreshKey]);
+  }, [refreshKey]);
+
+  const visible = tag ? meals.filter((m) => m.tag === tag) : meals;
 
   return (
     <div className="saved-meals">
@@ -47,11 +51,11 @@ export default function SavedMealsPicker({ refreshKey, onUse }: Props) {
         ))}
       </div>
       {status && <p className="status" role="status">{status}</p>}
-      {meals.length === 0 ? (
+      {visible.length === 0 ? (
         <p className="empty">No saved meals yet{tag ? ` tagged ${tag}` : ''}.</p>
       ) : (
         <ul className="saved-meal-list">
-          {meals.map((m) => (
+          {visible.map((m) => (
             <li key={m.id}>
               <button type="button" className="saved-meal-btn" onClick={() => onUse(m)}>
                 <span className="saved-meal-name">{m.name}</span>
