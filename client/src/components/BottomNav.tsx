@@ -21,6 +21,9 @@ const ICONS: Record<string, ReactElement> = {
   '/workout': (
     <path d="M6.5 9v6M4 10.5v3M17.5 9v6M20 10.5v3M8.5 12h7" />
   ),
+  '/progress': (
+    <path d="M4 18v-5M9 18V9M14 18v-8M19 18V6" />
+  ),
   '/supplements': (
     <g transform="rotate(45 12 12)">
       <rect x="3" y="9" width="18" height="6" rx="3" />
@@ -33,12 +36,13 @@ const LABELS: Record<string, string> = {
   '/': 'Today',
   '/calendar': 'Calendar',
   '/workout': 'Workout',
+  '/progress': 'Progress',
   '/supplements': 'Supplements',
 };
 
-const PATHS = ['/', '/calendar', '/workout', '/supplements'];
+const PATHS = ['/', '/calendar', '/workout', '/progress', '/supplements'];
 
-// A floating row of circular icon buttons for the 4 main pages, shown only at phone widths —
+// A floating row of circular icon buttons for the main pages, shown only at phone widths —
 // the sticky top bar's "more" menu still covers workout setup and the account/sign-out actions.
 export default function BottomNav({ currentPath, onNavigate }: Props) {
   if (!currentPath || !onNavigate) return null;

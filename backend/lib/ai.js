@@ -96,3 +96,63 @@ export async function estimateNutrition({ text, image }) {
     breakdown: String(result.breakdown),
   };
 }
+
+// Only the most recent sets are sent, to keep the payload (and token usage) small — recent trends
+// matter far more than ancient history for this kind of feedback.
+const MAX_SETS_FOR_INSIGHT = 200;
+
+const INSIGHT_PROMPT = `You are a strength-training coach. Below is a log of workout sets (exercise, weight, reps, date) for one person. It contains no name or other identifying information.
+Give very short, concise feedback based only on the data:
+- "improving" - one short sentence pointing at where the numbers show real progress.
+- "focus" - one short sentence on the single most useful thing to work on next.
+- "missing" - one short sentence noting a muscle group or movement pattern that looks under-trained or absent, or "" if nothing stands out.
+Each field must be under 160 characters, specific to this data, and never a generic platitude.`;
+
+const INSIGHT_RESPONSE_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    improving: { type: 'STRING' },
+    focus: { type: 'STRING' },
+    missing: { type: 'STRING' },
+  },
+  required: ['improving', 'focus', 'missing'],
+};
+
+/**
+ * @param {{ history: { exercise: string, category: string, weight: number, reps: number, date: string }[], exercise?: string }} input
+ * @returns {Promise<{ improving: string, focus: string, missing: string }>}
+ */
+export async function generateWorkoutInsight({ history, exercise }) {
+  if (!history?.length) {
+    throw new Error('No workout history to analyze.');
+  }
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY is not set. Add it to .env and restart the server.');
+  }
+
+  const recent = history.slice(-MAX_SETS_FOR_INSIGHT);
+  const parts = [{ text: INSIGHT_PROMPT }];
+  if (exercise) parts.push({ text: `Pay special attention to "${exercise}" if there's enough data for it.` });
+  parts.push({ text: `Sets (oldest first): ${JSON.stringify(recent)}` });
+
+  const body = await generate({
+    contents: [{ parts }],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: INSIGHT_RESPONSE_SCHEMA,
+      temperature: 0.3,
+    },
+  });
+
+  const raw = body.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text;
+  if (!raw) {
+    throw new Error('Gemini returned no answer (the request may have been blocked). Try again.');
+  }
+
+  const result = JSON.parse(raw);
+  return {
+    improving: String(result.improving ?? ''),
+    focus: String(result.focus ?? ''),
+    missing: String(result.missing ?? ''),
+  };
+}

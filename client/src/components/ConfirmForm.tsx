@@ -1,11 +1,17 @@
 import { useState } from 'react';
-import type { Estimate } from '../types';
+import type { Estimate, MealTag } from '../types';
+import { MEAL_TAGS } from '../types';
 import Spinner from './Spinner';
+
+export interface SaveAsMeal {
+  name: string;
+  tag: MealTag;
+}
 
 interface Props {
   estimate: Estimate;
   busy: boolean;
-  onSave: (description: string, grams: number, calories: number, fiber: number) => void;
+  onSave: (description: string, grams: number, calories: number, fiber: number, saveAsMeal?: SaveAsMeal) => void;
   onCancel: () => void;
 }
 
@@ -16,10 +22,15 @@ export default function ConfirmForm({ estimate, busy, onSave, onCancel }: Props)
   const [grams, setGrams] = useState(String(estimate.protein_g));
   const [calories, setCalories] = useState(String(estimate.calories));
   const [fiber, setFiber] = useState(String(estimate.fiber_g));
+  const [saveForLater, setSaveForLater] = useState(false);
+  const [mealName, setMealName] = useState(estimate.description);
+  const [mealTag, setMealTag] = useState<MealTag | ''>('');
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    onSave(description, Number(grams), Number(calories), Number(fiber));
+    const saveAsMeal =
+      saveForLater && mealTag ? { name: mealName.trim() || description, tag: mealTag } : undefined;
+    onSave(description, Number(grams), Number(calories), Number(fiber), saveAsMeal);
   };
 
   return (
@@ -69,8 +80,42 @@ export default function ConfirmForm({ estimate, busy, onSave, onCancel }: Props)
           />
         </label>
       </div>
+      <label className="checkbox save-meal-toggle">
+        <input
+          type="checkbox"
+          checked={saveForLater}
+          onChange={(e) => setSaveForLater(e.target.checked)}
+        />
+        <span>Save this meal for later</span>
+      </label>
+      {saveForLater && (
+        <div className="save-meal-fields">
+          <label>
+            Save as
+            <input
+              type="text"
+              value={mealName}
+              onChange={(e) => setMealName(e.target.value)}
+              maxLength={60}
+              required
+            />
+          </label>
+          <div className="saved-meal-tags">
+            {MEAL_TAGS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                className={'chip' + (mealTag === t ? ' is-selected' : '')}
+                onClick={() => setMealTag(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="row">
-        <button type="submit" disabled={busy}>
+        <button type="submit" disabled={busy || (saveForLater && !mealTag)}>
           {busy && <Spinner />}
           Save
         </button>

@@ -1,18 +1,21 @@
 import express from 'express';
-import { estimateNutrition } from './lib/ai.js';
+import { estimateNutrition, generateWorkoutInsight } from './lib/ai.js';
 import { requireAuth } from './lib/auth.js';
 import { isValidInviteCode, requireInvite } from './lib/invites.js';
 import {
   addEntry,
+  addSavedMeal,
   addSupplement,
   addWorkout,
   deleteWorkout,
   isActivated,
   markActivated,
+  readAllWorkouts,
   readEntries,
   readExerciseCatalog,
   readGoal,
   readLastWorkoutSession,
+  readSavedMeals,
   readSupplementChecks,
   readSupplements,
   readWorkoutActivity,
@@ -36,6 +39,9 @@ app.use(express.json({ limit: '10mb' }));
 const route = (fn) => (req, res, next) => fn(req, res).catch(next);
 
 const INVALID_CODE = { error: "That invite code isn't valid." };
+
+// Fixed set of labels a saved meal can be tagged with.
+const MEAL_TAGS = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
 
 // Public: lets the sign-up form check a code before an account is created.
 app.post('/api/invite/check', (req, res) => {
@@ -134,6 +140,50 @@ app.put('/api/entries/:id', route(async (req, res) => {
   res.json(await updateEntry(req.uid, req.params.id, fields));
 }));
 
+// The user's saved meal configurations, optionally filtered to one tag, for quickly re-adding
+// a past meal.
+app.get('/api/saved-meals', route(async (req, res) => {
+  const tag = typeof req.query.tag === 'string' ? req.query.tag : undefined;
+  if (tag && !MEAL_TAGS.includes(tag)) return res.status(400).json({ error: 'Unrecognized tag.' });
+  res.json({ savedMeals: await readSavedMeals(req.uid, tag) });
+}));
+
+// Save a meal configuration (the entry's description + macros) under a name and tag for reuse.
+app.post('/api/saved-meals', route(async (req, res) => {
+  const { name, tag, description, protein_g, calories, fiber_g } = req.body;
+  const trimmedName = String(name ?? '').trim();
+  const grams = Number(protein_g);
+  const cal = Number(calories) || 0;
+  const fiber = Number(fiber_g) || 0;
+  if (!trimmedName || trimmedName.length > 60) {
+    return res.status(400).json({ error: 'name is required (60 characters max)' });
+  }
+  if (!MEAL_TAGS.includes(tag)) {
+    return res.status(400).json({ error: `tag must be one of ${MEAL_TAGS.join(', ')}` });
+  }
+  if (typeof description !== 'string' || !description.trim() || description.length > 200) {
+    return res.status(400).json({ error: 'description is required (200 characters max)' });
+  }
+  if (!Number.isFinite(grams) || grams < 0 || grams > 1000) {
+    return res.status(400).json({ error: 'protein_g must be a number between 0 and 1000' });
+  }
+  if (cal < 0 || cal > 10000) {
+    return res.status(400).json({ error: 'calories must be a number between 0 and 10000' });
+  }
+  if (fiber < 0 || fiber > 300) {
+    return res.status(400).json({ error: 'fiber_g must be a number between 0 and 300' });
+  }
+  const meal = {
+    name: trimmedName,
+    tag,
+    description: description.trim(),
+    protein_g: grams,
+    calories: cal,
+    fiber_g: fiber,
+  };
+  res.status(201).json(await addSavedMeal(req.uid, meal));
+}));
+
 // Today's (or any date's) logged workout sets.
 app.get('/api/workouts', route(async (req, res) => {
   const date = pick(req.query.date, DATE_RE, todayString());
@@ -175,6 +225,29 @@ app.delete('/api/workouts/:id', route(async (req, res) => {
   }
   await deleteWorkout(req.uid, req.params.id);
   res.json({ ok: true });
+}));
+
+// Every set this user has ever logged, for the progress chart (plots weight over time per
+// exercise, picked client-side from this one list rather than one request per exercise).
+app.get('/api/workouts/history', route(async (req, res) => {
+  res.json({ workouts: await readAllWorkouts(req.uid) });
+}));
+
+// AI feedback on this user's training trends, generated from an anonymized slice of their own
+// workout history (exercise/weight/reps/date only — no uid, name or other identifying info).
+app.post('/api/workouts/insights', route(async (req, res) => {
+  const exercise = typeof req.body?.exercise === 'string' ? req.body.exercise : undefined;
+  const history = (await readAllWorkouts(req.uid)).map(({ category, exercise, weight, reps, date }) => ({
+    category,
+    exercise,
+    weight,
+    reps,
+    date,
+  }));
+  if (history.length === 0) {
+    return res.status(400).json({ error: 'Log some workouts first.' });
+  }
+  res.json(await generateWorkoutInsight({ history, exercise }));
 }));
 
 // How many sets were logged on each day in a range, e.g. for a streak/heatmap view. The browser

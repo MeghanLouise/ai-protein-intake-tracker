@@ -3,6 +3,7 @@
 //   users/{uid}/entries/{id}           { date, time, description, protein_g, calories, fiber_g, createdAt }
 //   users/{uid}/workouts/{id}          { date, time, category, exercise, weight, reps, createdAt }
 //   users/{uid}/supplementDays/{date}  { date, taken: string[] }
+//   users/{uid}/savedMeals/{id}        { name, tag, description, protein_g, calories, fiber_g, createdAt }
 // Only this server touches Firestore (through the Admin SDK), so client access can stay locked.
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { firebaseApp, hasServiceAccount } from './firebase.js';
@@ -70,6 +71,38 @@ export async function updateEntry(uid, id, { description, protein_g, calories, f
   return { id, date, time, ...edits };
 }
 
+// Saved meal configurations, newest first, optionally filtered to one tag.
+export async function readSavedMeals(uid, tag) {
+  let query = userDoc(uid).collection('savedMeals');
+  if (tag) query = query.where('tag', '==', tag);
+  const snap = await query.get();
+  return snap.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .map(({ id, name, tag, description, protein_g, calories, fiber_g }) => ({
+      id,
+      name,
+      tag,
+      description,
+      protein_g,
+      calories: calories || 0,
+      fiber_g: fiber_g || 0,
+    }));
+}
+
+export async function addSavedMeal(uid, { name, tag, description, protein_g, calories, fiber_g }) {
+  const meal = {
+    name,
+    tag,
+    description,
+    protein_g,
+    calories: calories || 0,
+    fiber_g: fiber_g || 0,
+  };
+  const ref = await userDoc(uid).collection('savedMeals').add({ ...meal, createdAt: Date.now() });
+  return { id: ref.id, ...meal };
+}
+
 // Workout sets for one calendar day, oldest first.
 export async function readWorkouts(uid, date) {
   const snap = await userDoc(uid).collection('workouts').where('date', '==', date).get();
@@ -97,6 +130,24 @@ export async function addWorkout(uid, { category, exercise, weight, reps, date, 
 // reach another user's workouts even if an id were guessed.
 export async function deleteWorkout(uid, id) {
   await userDoc(uid).collection('workouts').doc(id).delete();
+}
+
+// Every set this user has ever logged, oldest first. Used by the progress chart (to plot weight
+// over time per exercise) and the AI insights endpoint (to summarize trends).
+export async function readAllWorkouts(uid) {
+  const snap = await userDoc(uid).collection('workouts').get();
+  return snap.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .sort((a, b) => a.createdAt - b.createdAt)
+    .map(({ id, date, time, category, exercise, weight, reps }) => ({
+      id,
+      date,
+      time,
+      category,
+      exercise,
+      weight,
+      reps,
+    }));
 }
 
 // How many sets were logged on each date in a range, for a heatmap/streak view. Only dates with
