@@ -1238,12 +1238,18 @@ input[type='password'] {
   padding-top: 0;
 }
 
-/* Rows on the calendar's history lists open the day-detail edit view on click. */
+/* Rows on the calendar's history lists open the day-detail edit view on click. The hover
+   background is inset from the text with padding, offset by a matching negative margin so the
+   text itself stays aligned with the rest of the card. */
 .entry-log li.is-clickable,
 .entry-log li.clickable {
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: background 0.15s;
+  padding-left: 0.6rem;
+  padding-right: 0.6rem;
+  margin-left: -0.6rem;
+  margin-right: -0.6rem;
 }
 
 .entry-log li.is-clickable:hover,
