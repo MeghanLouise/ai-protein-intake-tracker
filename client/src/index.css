@@ -148,12 +148,12 @@ body {
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.5rem;
-  background: var(--surface);
+  /* More opaque than the usual frosted --surface: unlike a card, this sits over page content
+     (not just the background), so it needs to read as a solid menu rather than see-through. */
+  background: rgb(23, 32, 29);
   border: 1px solid var(--linen);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
 }
 
 .menu-account {
