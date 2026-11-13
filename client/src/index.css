@@ -7,7 +7,7 @@
      --cream is the sunken inset tone (inputs, chips) — a translucent dark overlay so it reads
      as "cut into" whatever surface it sits on; --surface is the frosted card tone on top. */
   --cream: rgba(0, 0, 0, 0.22);
-  --surface: rgba(74, 74, 76, 0.5);
+  --surface: rgba(255, 255, 255, 0.28);
   --linen: rgba(255, 255, 255, 0.14);
   --sand: #46434c;
   --white: #fdfdfc;
@@ -75,7 +75,7 @@ body {
   min-height: 100vh;
   font-family: var(--font-sans);
   color: var(--espresso);
-  background: linear-gradient(135deg, #3f4e4a 0%, #647d73 55%, #8d9f93 100%);
+  background: linear-gradient(135deg, #34464f 0%, #4f6e7e 55%, #7792a2 100%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
 }
@@ -94,7 +94,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(37, 46, 43, 0.6);
+  background: rgba(32, 44, 52, 0.6);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--linen);
@@ -150,7 +150,7 @@ body {
   padding: 0.5rem;
   /* More opaque than the usual frosted --surface: unlike a card, this sits over page content
      (not just the background), so it needs to read as a solid menu rather than see-through. */
-  background: rgb(54, 54, 56);
+  background: rgb(104, 126, 138);
   border: 1px solid var(--linen);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
