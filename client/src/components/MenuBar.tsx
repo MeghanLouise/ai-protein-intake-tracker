@@ -37,7 +37,7 @@ export default function MenuBar({ user, currentPath, onNavigate }: Props) {
     <nav className="menu-bar">
       <div className="menu-bar-inner">
         <span className="brand">
-          Wellness <em>Tracker</em>
+          MOTIV
         </span>
         <div className="menu" ref={menuRef}>
           <button

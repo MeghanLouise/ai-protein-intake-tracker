@@ -119,7 +119,7 @@ export default function ConfirmForm({ estimate, busy, onSave, onCancel }: Props)
           {busy && <Spinner />}
           Save
         </button>
-        <button type="button" className="link" onClick={onCancel}>
+        <button type="button" className="secondary" onClick={onCancel}>
           Cancel
         </button>
       </div>

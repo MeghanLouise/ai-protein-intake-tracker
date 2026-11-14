@@ -73,7 +73,7 @@ export default function EditMealForm({ entry, busy, onSave, onCancel }: Props) {
           {busy && <Spinner />}
           Save
         </button>
-        <button type="button" className="link" onClick={onCancel} disabled={busy}>
+        <button type="button" className="secondary" onClick={onCancel} disabled={busy}>
           Cancel
         </button>
       </div>

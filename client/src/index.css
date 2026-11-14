@@ -6,10 +6,10 @@
   /* Palette: a muted sage/slate gradient backdrop with frosted-glass cards on top.
      --cream is the sunken inset tone (inputs, chips) — a translucent dark overlay so it reads
      as "cut into" whatever surface it sits on; --surface is the frosted card tone on top. */
-  --cream: rgba(0, 0, 0, 0.22);
+  --cream: rgba(20, 45, 60, 0.14);
   --surface: rgba(255, 255, 255, 0.28);
   --linen: rgba(255, 255, 255, 0.14);
-  --sand: #46434c;
+  --sand: rgba(255, 255, 255, 0.34);
   --white: #fdfdfc;
   --on-light: #1a1a1a;
   --mocha: #b2aeb9;
@@ -24,8 +24,9 @@
   --accent: #c9a26a;
   --accent-dark: #a9824f;
 
-  --font-serif: 'Instrument Serif', Georgia, serif;
+  /* One family everywhere: --font-serif is kept as an alias so existing rules keep working. */
   --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-serif: var(--font-sans);
 
   --radius: 1.5rem;
   --radius-sm: 0.9rem;
@@ -110,12 +111,14 @@ body {
 }
 
 .menu-bar .brand {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
 }
 
 .menu-bar .brand em {
-  font-style: italic;
+  font-style: normal;
   color: var(--accent);
   transition: color 0.2s;
 }
@@ -220,14 +223,14 @@ body {
 h1 {
   margin: 0;
   font-family: var(--font-serif);
-  font-weight: 400;
+  font-weight: 500;
   font-size: 2.75rem;
   line-height: 1.05;
   letter-spacing: -0.01em;
 }
 
 h1 em {
-  font-style: italic;
+  font-style: normal;
   color: var(--accent);
   transition: color 0.2s;
 }
@@ -243,7 +246,7 @@ h1 em {
 h2 {
   margin: 0 0 1rem;
   font-family: var(--font-serif);
-  font-weight: 400;
+  font-weight: 500;
   font-size: 1.6rem;
 }
 
@@ -311,7 +314,7 @@ h2 {
 
 .total {
   font-family: var(--font-serif);
-  font-size: 4.5rem;
+  font-size: 3rem;
   line-height: 1;
 }
 
@@ -495,7 +498,7 @@ input[type='number'] {
 }
 
 textarea::placeholder {
-  color: #6f6c76;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 textarea:focus,
@@ -947,6 +950,17 @@ button.link:hover:not(:disabled) {
   background: none;
   color: var(--mocha-dark);
   text-decoration-color: currentColor;
+}
+
+/* Secondary action (Cancel): same pill shape as the primary button, but frosted and outlined. */
+button.secondary {
+  color: var(--espresso);
+  background: var(--linen);
+  border: 1px solid var(--sand);
+}
+
+button.secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.24);
 }
 
 /* Photo picker: the real <input> is hidden, the label acts as the button */

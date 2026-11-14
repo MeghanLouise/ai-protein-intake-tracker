@@ -1,4 +1,4 @@
-# Wellness Tracker
+# MOTIV
 
 A small web app for tracking daily protein (plus calories and fiber), workouts and supplements. Describe a meal or upload a photo, an AI estimates the nutrition, and entries are stored per user in Firestore.
 

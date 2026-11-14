@@ -77,7 +77,7 @@ export default function ProgressSummary({
           </label>
           <div className="row">
             <button type="submit">Save</button>
-            <button type="button" className="link" onClick={() => setEditing(false)}>
+            <button type="button" className="secondary" onClick={() => setEditing(false)}>
               Cancel
             </button>
           </div>

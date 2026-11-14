@@ -9,5 +9,5 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(import.meta.dirname, 'dist')));
 
 app.listen(PORT, () => {
-  console.log(`Protein tracker running at http://localhost:${PORT}`);
+  console.log(`MOTIV running at http://localhost:${PORT}`);
 });
