@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { errorMessage, getLastWorkout } from '../api';
 import type { ExerciseCatalog, LastWorkoutResponse, WorkoutSet } from '../types';
 import { CATEGORIES, groupSets } from '../workouts';
+import Select from './Select';
+import Button from './Button';
 import Spinner from './Spinner';
 
 interface Props {
@@ -120,31 +122,21 @@ export default function AddSetForm({ catalog, onAdd }: Props) {
       <h2>Log a set</h2>
       <div className="category-grid">
         {CATEGORIES.map((c) => (
-          <button
-            key={c}
-            type="button"
-            className={'category-btn' + (c === category ? ' is-selected' : '')}
-            onClick={() => pickCategory(c)}
-          >
+          <Button key={c} variant="category" selected={c === category} onClick={() => pickCategory(c)}>
             {c}
-          </button>
+          </Button>
         ))}
       </div>
       {category && (
         <form onSubmit={submit}>
-          <label>
-            Exercise
-            <select value={exercise} onChange={(e) => setExercise(e.target.value)} required>
-              <option value="" disabled>
-                Choose an exercise
-              </option>
-              {catalog[category].map((ex) => (
-                <option key={ex} value={ex}>
-                  {ex}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            label="Exercise"
+            value={exercise}
+            onChange={setExercise}
+            options={catalog[category]}
+            placeholder="Choose an exercise"
+            required
+          />
           {exercise &&
             (lastLoading ? (
               <div className="last-session">
@@ -177,10 +169,9 @@ export default function AddSetForm({ catalog, onAdd }: Props) {
               />
             </label>
           </div>
-          <button type="submit" disabled={busy}>
-            {busy && <Spinner />}
+          <Button type="submit" loading={busy}>
             Add set
-          </button>
+          </Button>
         </form>
       )}
       <p className="status" role="status">{status}</p>

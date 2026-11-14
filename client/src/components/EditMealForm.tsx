@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Entry } from '../types';
-import Spinner from './Spinner';
+import Button from './Button';
 
 interface Props {
   entry: Entry;
@@ -69,13 +69,12 @@ export default function EditMealForm({ entry, busy, onSave, onCancel }: Props) {
         </label>
       </div>
       <div className="row">
-        <button type="submit" disabled={busy}>
-          {busy && <Spinner />}
+        <Button type="submit" loading={busy}>
           Save
-        </button>
-        <button type="button" className="secondary" onClick={onCancel} disabled={busy}>
+        </Button>
+        <Button variant="secondary" onClick={onCancel} disabled={busy}>
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );

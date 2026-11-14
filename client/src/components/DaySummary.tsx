@@ -1,3 +1,5 @@
+import Button from './Button';
+
 interface Props {
   workoutCategories: string[];
   selectedCategory: string | null;
@@ -24,15 +26,14 @@ export default function DaySummary({
         {workoutCategories.length > 0 ? (
           <div className="day-summary-chips">
             {workoutCategories.map((category) => (
-              <button
+              <Button
                 key={category}
-                type="button"
-                className={'chip' + (category === selectedCategory ? ' is-selected' : '')}
-                aria-pressed={category === selectedCategory}
+                variant="chip"
+                selected={category === selectedCategory}
                 onClick={() => onSelectCategory(category)}
               >
                 {category}
-              </button>
+              </Button>
             ))}
           </div>
         ) : (

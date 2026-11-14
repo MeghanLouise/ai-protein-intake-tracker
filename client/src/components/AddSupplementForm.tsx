@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Spinner from './Spinner';
+import Button from './Button';
 
 interface Props {
   busy: boolean;
@@ -29,10 +29,9 @@ export default function AddSupplementForm({ busy, onAdd }: Props) {
           required
         />
       </label>
-      <button type="submit" disabled={busy}>
-        {busy && <Spinner />}
+      <Button type="submit" loading={busy}>
         Add to list
-      </button>
+      </Button>
     </form>
   );
 }

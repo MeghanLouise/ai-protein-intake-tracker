@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { errorMessage, getWorkoutHistory, getWorkoutInsight } from '../api';
 import type { WorkoutInsight, WorkoutSet } from '../types';
+import Select from './Select';
+import Button from './Button';
 import Spinner from './Spinner';
 import WeightChart from './WeightChart';
 
@@ -65,16 +67,7 @@ export default function ProgressPage() {
         {exercises.length === 0 ? (
           <p className="eyebrow">Log a few sets on the Workout page to see your progress here.</p>
         ) : (
-          <label>
-            Exercise
-            <select value={exercise} onChange={(e) => setExercise(e.target.value)}>
-              {exercises.map((ex) => (
-                <option key={ex} value={ex}>
-                  {ex}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select label="Exercise" value={exercise} onChange={setExercise} options={exercises} />
         )}
       </section>
 
@@ -92,10 +85,9 @@ export default function ProgressPage() {
       {exercises.length > 0 && (
         <section className="card insight-card">
           <h3>AI insights</h3>
-          <button type="button" onClick={requestInsight} disabled={insightLoading}>
-            {insightLoading && <Spinner />}
+          <Button onClick={requestInsight} loading={insightLoading}>
             {insightLoading ? 'Thinking…' : insight ? 'Refresh insight' : 'Get insight'}
-          </button>
+          </Button>
           {insightError && <p className="error" role="alert">{insightError}</p>}
           {insight && (
             <dl className="insight-list">

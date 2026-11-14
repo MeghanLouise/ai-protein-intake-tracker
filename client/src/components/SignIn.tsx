@@ -7,7 +7,7 @@ import {
 import { useState } from 'react';
 import { checkInvite, redeemInvite } from '../api';
 import { auth } from '../firebase';
-import Spinner from './Spinner';
+import Button from './Button';
 
 // Turn Firebase error codes into friendly messages. Empty string = show nothing.
 function friendlyError(err: unknown): string {
@@ -87,10 +87,9 @@ export default function SignIn({ onSignUpProgress, onActivated }: Props) {
     <section className="card sign-in">
       <h2>{mode === 'signin' ? 'Welcome back' : 'Create your account'}</h2>
 
-      <button type="button" className="google" onClick={google} disabled={busy}>
-        {busy && <Spinner />}
+      <Button variant="google" onClick={google} loading={busy}>
         Continue with Google
-      </button>
+      </Button>
 
       <p className="divider"><span>or</span></p>
 
@@ -129,24 +128,22 @@ export default function SignIn({ onSignUpProgress, onActivated }: Props) {
             required
           />
         </label>
-        <button type="submit" disabled={busy}>
-          {busy && <Spinner />}
+        <Button type="submit" loading={busy}>
           {mode === 'signin' ? 'Sign in' : 'Create account'}
-        </button>
+        </Button>
       </form>
 
       {error && <p className="error" role="alert">{error}</p>}
 
-      <button
-        type="button"
-        className="link"
+      <Button
+        variant="link"
         onClick={() => {
           setMode(mode === 'signin' ? 'signup' : 'signin');
           setError('');
         }}
       >
         {mode === 'signin' ? 'New here? Create an account' : 'Already have an account? Sign in'}
-      </button>
+      </Button>
     </section>
   );
 }

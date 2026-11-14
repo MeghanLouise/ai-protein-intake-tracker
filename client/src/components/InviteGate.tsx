@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { errorMessage, redeemInvite } from '../api';
+import Button from './Button';
 
 // Shown to signed-in users who haven't redeemed an invite code yet (e.g. new Google sign-ins).
 export default function InviteGate({ onActivated }: { onActivated: () => void }) {
@@ -36,9 +37,9 @@ export default function InviteGate({ onActivated }: { onActivated: () => void })
             required
           />
         </label>
-        <button type="submit" disabled={busy}>
+        <Button type="submit" disabled={busy}>
           Continue
-        </button>
+        </Button>
       </form>
       {error && <p className="error" role="alert">{error}</p>}
       <p className="setup">You can sign out from the menu (&#8942;) at the top of the page.</p>

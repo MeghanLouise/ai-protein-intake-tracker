@@ -10,6 +10,8 @@ import {
   updateWorkout,
 } from '../api';
 import type { Entry, ExerciseCatalog, TodayResponse, WorkoutSet } from '../types';
+import Select from './Select';
+import Button from './Button';
 import Spinner from './Spinner';
 
 interface Props {
@@ -90,13 +92,12 @@ function EditEntryRow({
           </label>
         </div>
         <div className="row">
-          <button type="submit" disabled={busy}>
-            {busy && <Spinner />}
+          <Button type="submit" loading={busy}>
             Save
-          </button>
-          <button type="button" className="secondary" onClick={onCancel} disabled={busy}>
+          </Button>
+          <Button variant="secondary" onClick={onCancel} disabled={busy}>
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
     </li>
@@ -130,19 +131,15 @@ function EditSetRow({
   return (
     <li className="entry-edit-row">
       <form onSubmit={submit}>
-        <label>
-          Exercise
-          <select value={exercise} onChange={(e) => setExercise(e.target.value)} required>
-            {/* The currently logged exercise might not be in the catalog anymore (e.g. it was
-                later removed from the day type), so it's always offered alongside the catalog. */}
-            {!exercises.includes(set.exercise) && <option value={set.exercise}>{set.exercise}</option>}
-            {exercises.map((ex) => (
-              <option key={ex} value={ex}>
-                {ex}
-              </option>
-            ))}
-          </select>
-        </label>
+        {/* The currently logged exercise might not be in the catalog anymore (e.g. it was
+            later removed from the day type), so it's always offered alongside the catalog. */}
+        <Select
+          label="Exercise"
+          value={exercise}
+          onChange={setExercise}
+          options={exercises.includes(set.exercise) ? exercises : [set.exercise, ...exercises]}
+          required
+        />
         <div className="row-fields">
           <label>
             Weight (kg)
@@ -154,13 +151,12 @@ function EditSetRow({
           </label>
         </div>
         <div className="row">
-          <button type="submit" disabled={busy}>
-            {busy && <Spinner />}
+          <Button type="submit" loading={busy}>
             Save
-          </button>
-          <button type="button" className="secondary" onClick={onCancel} disabled={busy}>
+          </Button>
+          <Button variant="secondary" onClick={onCancel} disabled={busy}>
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
     </li>
@@ -246,9 +242,9 @@ export default function DayDetail({ date, onBack }: Props) {
   return (
     <div className="column day-detail">
       <section className="card day-detail-header">
-        <button type="button" className="link back-link" onClick={onBack}>
+        <Button variant="link" className="back-link" onClick={onBack}>
           &#8249; Back to calendar
-        </button>
+        </Button>
         <h2>{formatHeading(date)}</h2>
         {error && (
           <p className="error" role="alert">
@@ -284,26 +280,24 @@ export default function DayDetail({ date, onBack }: Props) {
                       <span className="stats">
                         <span className="figure">{entry.protein_g} g</span>
                       </span>
-                      <button
-                        type="button"
-                        className="edit-btn"
+                      <Button
+                        variant="icon"
                         aria-label={`Edit ${entry.description}`}
                         title="Edit this meal"
                         disabled={busy}
                         onClick={() => setEditingEntryId(entry.id)}
                       >
                         &#9998;
-                      </button>
-                      <button
-                        type="button"
-                        className="delete-btn"
+                      </Button>
+                      <Button
+                        variant="icon"
                         aria-label={`Delete ${entry.description}`}
                         title="Delete this meal"
                         disabled={busy}
                         onClick={() => removeEntry(entry)}
                       >
                         &#215;
-                      </button>
+                      </Button>
                     </li>
                   ),
                 )}
@@ -336,26 +330,24 @@ export default function DayDetail({ date, onBack }: Props) {
                       <span className="figure">
                         {set.weight}&nbsp;&times;&nbsp;{set.reps}
                       </span>
-                      <button
-                        type="button"
-                        className="edit-btn"
+                      <Button
+                        variant="icon"
                         aria-label={`Edit ${set.exercise}`}
                         title="Edit this set"
                         disabled={busy}
                         onClick={() => setEditingSetId(set.id)}
                       >
                         &#9998;
-                      </button>
-                      <button
-                        type="button"
-                        className="delete-btn"
+                      </Button>
+                      <Button
+                        variant="icon"
                         aria-label={`Delete ${set.exercise}`}
                         title="Delete this set"
                         disabled={busy}
                         onClick={() => removeSet(set)}
                       >
                         &#215;
-                      </button>
+                      </Button>
                     </li>
                   ),
                 )}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { errorMessage, getExerciseCatalog, saveExerciseCatalog } from '../api';
 import type { ExerciseCatalog } from '../types';
 import { CATEGORIES } from '../workouts';
+import Button from './Button';
 import Spinner from './Spinner';
 
 const MAX_PER_CATEGORY = 20; // keep in sync with backend/lib/workouts.js
@@ -116,15 +117,14 @@ export default function WorkoutSetup() {
               onChange={(e) => setDrafts((prev) => ({ ...prev, [category]: e.target.value }))}
               maxLength={60}
             />
-            <button type="submit">Add</button>
+            <Button type="submit">Add</Button>
           </form>
         </fieldset>
       ))}
       <div className="row">
-        <button type="button" onClick={save} disabled={busy}>
-          {busy && <Spinner />}
+        <Button onClick={save} loading={busy}>
           Save
-        </button>
+        </Button>
         <p className="status" role="status">{status}</p>
       </div>
     </section>

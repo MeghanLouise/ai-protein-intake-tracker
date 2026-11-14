@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { WorkoutSet } from '../types';
 import { groupSets } from '../workouts';
+import Button from './Button';
 
 interface Props {
   sets: WorkoutSet[];
@@ -86,9 +87,8 @@ export default function WorkoutEntryList({
                   {group.length > 1 && <span className="pill">&times;{group.length}</span>}
                 </span>
                 {onDuplicate && (
-                  <button
-                    type="button"
-                    className="duplicate-btn"
+                  <Button
+                    variant="icon"
                     aria-label={`Repeat ${s.exercise}: ${s.weight} × ${s.reps}`}
                     title="Repeat this set"
                     disabled={duplicating}
@@ -98,7 +98,7 @@ export default function WorkoutEntryList({
                     }}
                   >
                     &#43;
-                  </button>
+                  </Button>
                 )}
                 {onDelete && (
                   <span className="set-menu" ref={openMenuId === s.id ? menuRef : undefined}>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Preferences } from '../usePreferences';
 import DisplayToggles from './DisplayToggles';
+import Button from './Button';
 
 interface Props {
   total: number;
@@ -76,16 +77,16 @@ export default function ProgressSummary({
             />
           </label>
           <div className="row">
-            <button type="submit">Save</button>
-            <button type="button" className="secondary" onClick={() => setEditing(false)}>
+            <Button type="submit">Save</Button>
+            <Button variant="secondary" onClick={() => setEditing(false)}>
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       ) : (
-        <button type="button" className="link" onClick={startEditing}>
+        <Button variant="link" onClick={startEditing}>
           Change goal
-        </button>
+        </Button>
       )}
     </section>
   );

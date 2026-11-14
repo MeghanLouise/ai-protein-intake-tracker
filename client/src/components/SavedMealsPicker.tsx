@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { errorMessage, getSavedMeals } from '../api';
 import type { MealTag, SavedMeal } from '../types';
 import { MEAL_TAGS } from '../types';
+import Button from './Button';
 
 interface Props {
   refreshKey: number;
@@ -36,18 +37,13 @@ export default function SavedMealsPicker({ refreshKey, onUse }: Props) {
     <div className="saved-meals">
       <p className="eyebrow">Saved meals</p>
       <div className="saved-meal-tags">
-        <button type="button" className={'chip' + (tag === null ? ' is-selected' : '')} onClick={() => setTag(null)}>
+        <Button variant="chip" selected={tag === null} onClick={() => setTag(null)}>
           All
-        </button>
+        </Button>
         {MEAL_TAGS.map((t) => (
-          <button
-            key={t}
-            type="button"
-            className={'chip' + (tag === t ? ' is-selected' : '')}
-            onClick={() => setTag(t)}
-          >
+          <Button key={t} variant="chip" selected={tag === t} onClick={() => setTag(t)}>
             {t}
-          </button>
+          </Button>
         ))}
       </div>
       {status && <p className="status" role="status">{status}</p>}

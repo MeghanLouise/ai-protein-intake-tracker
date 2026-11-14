@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Estimate, MealTag } from '../types';
 import { MEAL_TAGS } from '../types';
-import Spinner from './Spinner';
+import Button from './Button';
 
 export interface SaveAsMeal {
   name: string;
@@ -102,26 +102,20 @@ export default function ConfirmForm({ estimate, busy, onSave, onCancel }: Props)
           </label>
           <div className="saved-meal-tags">
             {MEAL_TAGS.map((t) => (
-              <button
-                key={t}
-                type="button"
-                className={'chip' + (mealTag === t ? ' is-selected' : '')}
-                onClick={() => setMealTag(t)}
-              >
+              <Button key={t} variant="chip" selected={mealTag === t} onClick={() => setMealTag(t)}>
                 {t}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
       )}
       <div className="row">
-        <button type="submit" disabled={busy || (saveForLater && !mealTag)}>
-          {busy && <Spinner />}
+        <Button type="submit" loading={busy} disabled={saveForLater && !mealTag}>
           Save
-        </button>
-        <button type="button" className="secondary" onClick={onCancel}>
+        </Button>
+        <Button variant="secondary" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );
