@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "stop": "node scripts/dev.mjs --stop",
     "build": "vite build",
     "start": "vite build && node --env-file-if-exists=.env server.js",
     "typecheck": "tsc",

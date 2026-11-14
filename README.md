@@ -57,6 +57,8 @@ npm run dev
 
 Open http://localhost:5173 (Vite, with hot reload). It forwards `/api` calls to the Express server on port 3000, which `npm run dev` starts for you. Restart it after changing `.env`.
 
+The app only ever runs on those two ports. Running `npm run dev` again first stops any leftover MOTIV dev servers from earlier runs, and if an unrelated program is using a port it tells you instead of moving to another one. `npm run stop` shuts down this project's dev servers from any terminal.
+
 For a production-style run, `npm start` builds the client into `dist/` and serves everything from http://localhost:3000. `npm run typecheck` checks the TypeScript without building.
 
 ## Layout
